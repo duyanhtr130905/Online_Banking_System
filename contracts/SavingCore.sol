@@ -242,12 +242,221 @@ contract SavingCore is ERC721, AccessControl, Pausable, ReentrancyGuard {
         return super.supportsInterface(interfaceId);
     }
 
-    // ==================== NGÀY 4-5 SẼ BỔ SUNG TẠI ĐÂY ====================
-    // function openDeposit(...)
-    // function withdrawAtMaturity(...)
-    // function earlyWithdraw(...)
+    // ==================== NGÀY 4-5: DEPOSIT CORE LOGIC ====================
+    // Phạm vi Ngày 4: openDeposit, calculateInterest, calculatePenalty,
+    //                 withdrawAtMaturity, earlyWithdraw.
+    // Phạm vi Ngày 5 (chưa làm): renewDeposit, autoRenewDeposit.
+
+    /**
+     * @notice Mở 1 khoản tiết kiệm mới theo gói Plan đã chọn.
+     * @dev whenNotPaused: ngăn mở deposit khi contract đang bị tạm dừng khẩn cấp.
+     *      Luồng xử lý theo đúng thứ tự "check - effects - interactions" (CEI pattern):
+     *        1. CHECK: kiểm tra đầu vào hợp lệ.
+     *        2. EFFECTS: ghi state (deposits, mint NFT) trước.
+     *        3. INTERACTIONS: chuyển token (external call) sau cùng.
+     *      Thứ tự này giúp phòng tránh reentrancy attack (dù đã có ReentrancyGuard, CEI
+     *      là lớp bảo vệ thứ 2 - defence in depth).
+     * @param planId   ID của gói tiết kiệm user chọn.
+     * @param amount   Số token muốn gửi (tính bằng đơn vị nhỏ nhất của depositToken).
+     * @return depositId  ID của khoản deposit vừa mở (cũng là tokenId của NFT chứng chỉ).
+     */
+    function openDeposit(uint256 planId, uint256 amount)
+        external
+        whenNotPaused
+        nonReentrant
+        returns (uint256 depositId)
+    {
+        Plan storage plan = plans[planId];
+
+        // CHECK 1: Gói phải đang được phép mở (admin có thể tạm disable một gói bất kỳ lúc nào).
+        require(plan.enabled, "plan is not enabled");
+
+        // CHECK 2: Số tiền gửi phải đạt mức tối thiểu của gói.
+        require(amount >= plan.minDeposit, "amount below minDeposit");
+
+        // CHECK 3: Nếu plan có giới hạn tối đa (maxDeposit > 0), kiểm tra không được vượt.
+        //          maxDeposit == 0 có nghĩa là "không giới hạn" - đây là convention trong hệ thống.
+        require(plan.maxDeposit == 0 || amount <= plan.maxDeposit, "amount above maxDeposit");
+
+        // EFFECTS: gán depositId trước khi làm bất cứ điều gì khác.
+        //          _nextDepositId++ trả về giá trị TRƯỚC khi tăng (post-increment trong Solidity),
+        //          tương đương: depositId = _nextDepositId; _nextDepositId += 1;
+        depositId = _nextDepositId++;
+
+        // SNAPSHOT: Copy giá trị aprBps và penaltyBps từ Plan vào Deposit ngay tại thời điểm mở.
+        //           ĐÂY LÀ ĐIỂM CỐT LÕI của Business Rule #1:
+        //           - Sau này dù admin gọi updatePlan() thay đổi aprBps của Plan,
+        //             deposit này vẫn đọc aprBpsAtOpen (con số cũ đã được lưu riêng), không bao giờ
+        //             đọc lại plans[planId].aprBps nữa.
+        //           - Tránh dùng "storage pointer" ở đây vì nếu admin đổi Plan, pointer sẽ bị
+        //             ảnh hưởng theo. Phải COPY từng trường ra.
+        deposits[depositId] = Deposit({
+            planId: planId,
+            principal: amount,
+            maturityAt: block.timestamp + (uint256(plan.tenorDays) * 1 days),
+            aprBpsAtOpen: plan.aprBps,           // SNAPSHOT - không phải tham chiếu đến plan
+            penaltyBpsAtOpen: plan.earlyWithdrawPenaltyBps, // SNAPSHOT
+            status: Status.Active
+        });
+
+        // INTERACTIONS (1/2): Chuyển token từ user vào contract NÀY TRƯỚC.
+        //   - Lý do đổi thứ tự so với CEI thuần túy: _safeMint() bên dưới sẽ gọi
+        //     onERC721Received() nếu msg.sender là smart contract - đây là external call
+        //     có thể bị kẻ tấn công dùng để callback vào earlyWithdraw() hoặc hàm khác.
+        //   - Bằng cách chuyển token VÀO TRƯỚC, ta đảm bảo tiền đã thực sự trong contract
+        //     trước khi bất kỳ callback nào có thể chạy - xóa bỏ vector tấn công reentrancy.
+        //   - nonReentrant modifier ở chữ ký hàm là lớp phòng thủ thứ 2 (defence in depth).
+        //   - safeTransferFrom tự revert nếu user chưa approve hoặc không đủ số dư.
+        depositToken.safeTransferFrom(msg.sender, address(this), amount);
+
+        // INTERACTIONS (2/2): Mint NFT chứng chỉ cho user SAU KHI tiền đã vào contract.
+        //   - tokenId == depositId để tra cứu owner bằng ownerOf() mà không cần mapping riêng.
+        //   - _safeMint an toàn hơn _mint: kiểm tra IERC721Receiver nếu recipient là contract.
+        _safeMint(msg.sender, depositId);
+
+        emit DepositOpened(depositId, msg.sender, planId, amount, deposits[depositId].maturityAt, plan.aprBps);
+    }
+
+    /**
+     * @notice Tính lãi dự kiến nhận được khi đáo hạn cho 1 khoản deposit.
+     * @dev Công thức lãi đơn (simple interest):
+     *        interest = principal * aprBps * tenorSeconds / (365 days * 10000)
+     *      QUAN TRỌNG - thứ tự nhân/chia:
+     *        - Nhân HẾT trước (principal * aprBps * tenorSeconds), sau đó mới chia.
+     *        - Tuyệt đối KHÔNG viết: (principal / (365 days * 10000)) * aprBps * tenorSeconds
+     *          vì nếu principal nhỏ, phép chia đầu tiên sẽ làm tròn xuống 0, mất toàn bộ lãi.
+     *        - Solidity không có số thập phân, nên nhân trước - chia sau là cách duy nhất
+     *          giữ độ chính xác tối đa trước khi làm tròn.
+     *      aprBpsAtOpen: đọc từ snapshot của deposit, KHÔNG đọc plans[planId].aprBps hiện tại,
+     *      đảm bảo deposit đã mở không bị ảnh hưởng khi admin thay đổi Plan sau này.
+     * @param depositId  ID của khoản deposit cần tính lãi.
+     * @return           Số lãi (cùng đơn vị với principal / depositToken).
+     */
+    function calculateInterest(uint256 depositId) public view returns (uint256) {
+        Deposit storage dep = deposits[depositId];
+
+        // tenorSeconds: tính từ dữ liệu của Plan hiện tại (chỉ đọc tenorDays, không đọc aprBps).
+        // Cách tiếp cận này hợp lệ vì tenorDays của Plan không bao giờ thay đổi sau khi tạo
+        // (không có hàm updatePlan cho tenorDays). Nếu sau này có, cần snapshot cả tenorDays.
+        uint256 tenorSeconds = uint256(plans[dep.planId].tenorDays) * 1 days;
+
+        // Nhân tất cả trước (principal * aprBpsAtOpen * tenorSeconds), chia sau.
+        // aprBpsAtOpen là uint16 - phải ép kiểu về uint256 trước khi nhân tránh overflow (unlikely
+        // ở uint16 nhưng là thói quen an toàn khi làm việc với Solidity arithmetic).
+        return (dep.principal * uint256(dep.aprBpsAtOpen) * tenorSeconds) / (365 days * 10000);
+    }
+
+    /**
+     * @notice Tính số tiền phạt nếu user rút sớm trước khi đáo hạn.
+     * @dev Công thức: penalty = principal * penaltyBpsAtOpen / 10000
+     *      penaltyBpsAtOpen là snapshot - giá trị đã được chốt lúc mở deposit.
+     *      Dù admin gọi updatePlan() để đổi earlyWithdrawPenaltyBps của Plan, khoản deposit
+     *      này vẫn tính phạt theo mức đã snapshot, đảm bảo tính minh bạch và công bằng
+     *      với user (user ký kết theo điều khoản nào, phạt theo điều khoản đó).
+     * @param depositId  ID của khoản deposit cần tính phạt.
+     * @return           Số tiền bị trừ phạt khi rút sớm.
+     */
+    function calculatePenalty(uint256 depositId) public view returns (uint256) {
+        Deposit storage dep = deposits[depositId];
+        // Nhân trước chia sau - tương tự calculateInterest để nhất quán và tránh mất độ chính xác.
+        return (dep.principal * uint256(dep.penaltyBpsAtOpen)) / 10000;
+    }
+
+    /**
+     * @notice Rút tiền khi đáo hạn: nhận lại toàn bộ principal + lãi.
+     * @dev nonReentrant: chặn reentrancy attack (dù đã dùng CEI pattern ở trên,
+     *      nonReentrant là lớp bảo vệ bắt buộc cho mọi hàm có external call chuyển tiền).
+     *      whenNotPaused: ngăn rút tiền khi contract đang xử lý sự cố khẩn cấp.
+     *      Lãi (interest) được lấy từ VaultManager (vault.payInterest) - không phải từ số dư
+     *      principal trong contract này - đúng với Business Rule #5: tách biệt principal và lãi.
+     * @param depositId  ID của khoản deposit muốn rút.
+     */
+    function withdrawAtMaturity(uint256 depositId)
+        external
+        nonReentrant
+        whenNotPaused
+    {
+        // CHECK: Chỉ chủ sở hữu NFT mới được rút (ownerOf từ ERC721 sẽ revert nếu token không tồn tại).
+        require(ownerOf(depositId) == msg.sender, "not owner");
+
+        // CHECK: Chỉ deposit đang Active mới được rút (tránh rút 2 lần).
+        require(deposits[depositId].status == Status.Active, "not active");
+
+        // CHECK: Phải đợi đến sau hoặc đúng thời điểm đáo hạn.
+        require(block.timestamp >= deposits[depositId].maturityAt, "not matured yet");
+
+        // Đọc dữ liệu cần thiết vào bộ nhớ trước khi thay đổi state (thói quen tốt với CEI).
+        uint256 principal = deposits[depositId].principal;
+        uint256 interest = calculateInterest(depositId);
+
+        // EFFECTS: Đổi status TRƯỚC khi chuyển tiền - phòng reentrancy (lớp CEI).
+        deposits[depositId].status = Status.Withdrawn;
+
+        // INTERACTIONS: Trả principal (từ số dư token trong contract này).
+        depositToken.safeTransfer(msg.sender, principal);
+
+        // INTERACTIONS: Gọi vault để trả lãi (vault giữ pool lãi riêng, tách biệt với principal).
+        //               vault.payInterest sẽ chuyển interest token từ VaultManager sang msg.sender.
+        vault.payInterest(msg.sender, interest);
+
+        // isEarly = false: đây là rút đúng hạn, không phạt.
+        emit Withdrawn(depositId, msg.sender, principal, interest, false);
+    }
+
+    /**
+     * @notice Rút tiền sớm trước khi đáo hạn: mất toàn bộ lãi, bị trừ thêm tiền phạt.
+     * @dev Lý do KHÔNG trả lãi khi rút sớm (interest = 0):
+     *      - Business Rule bắt buộc theo đề bài: rút sớm đồng nghĩa từ bỏ quyền hưởng lãi.
+     *      - Về mặt tài chính: ngân hàng chưa "chốt sổ" lãi cho deposit chưa đáo hạn,
+     *        việc trả lãi lũy kế đến thời điểm rút sớm sẽ phức tạp hóa mô hình không cần thiết.
+     *      Tiền phạt (penalty) được chuyển thẳng cho feeReceiver (ví của tổ chức/dự án),
+     *      không giữ lại trong contract - tránh tích lũy ETH/token không kiểm soát.
+     * @param depositId  ID của khoản deposit muốn rút sớm.
+     */
+    function earlyWithdraw(uint256 depositId)
+        external
+        nonReentrant
+        whenNotPaused
+    {
+        // CHECK: Chỉ chủ sở hữu NFT mới được rút.
+        require(ownerOf(depositId) == msg.sender, "not owner");
+
+        // CHECK: Chỉ deposit đang Active.
+        require(deposits[depositId].status == Status.Active, "not active");
+
+        // CHECK: Phải chưa đáo hạn - nếu đã đáo hạn thì dùng withdrawAtMaturity để nhận lãi.
+        require(
+            block.timestamp < deposits[depositId].maturityAt,
+            "already matured, use withdrawAtMaturity"
+        );
+
+        uint256 principal = deposits[depositId].principal;
+
+        // penalty dùng snapshot penaltyBpsAtOpen - không đọc lại plan hiện tại.
+        uint256 penalty = calculatePenalty(depositId);
+
+        // Số tiền user thực nhận = principal - penalty.
+        // Solidity 0.8+ tự revert nếu underflow (penalty > principal), nhưng thực tế
+        // penaltyBpsAtOpen < 10000 (đã validate trong createPlan) nên penalty < principal luôn đúng.
+        uint256 payout = principal - penalty;
+
+        // EFFECTS: Đổi status trước khi chuyển tiền (CEI pattern).
+        deposits[depositId].status = Status.Withdrawn;
+
+        // INTERACTIONS: Trả phần còn lại sau phạt cho user.
+        depositToken.safeTransfer(msg.sender, payout);
+
+        // INTERACTIONS: Chuyển tiền phạt cho feeReceiver (không giữ lại trong contract).
+        if (penalty > 0) {
+            depositToken.safeTransfer(feeReceiver, penalty);
+        }
+
+        // interest = 0 (Business Rule: rút sớm không được hưởng lãi).
+        // isEarly = true để front-end/event listener phân biệt loại rút tiền.
+        emit Withdrawn(depositId, msg.sender, payout, 0, true);
+    }
+
+    // ==================== NGÀY 5+ SẼ BỔ SUNG TẠI ĐÂY ====================
     // function renewDeposit(...)
     // function autoRenewDeposit(...)
-    // function calculateInterest(...)
-    // function calculatePenalty(...)
 }
