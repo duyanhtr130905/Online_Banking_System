@@ -31,31 +31,12 @@
 | Early withdraw penalty | 300 + B×50 bps | 300 + 2×50 = 300+100 | **400 bps = 4.00%** |
 | Default plan tenor | B chẵn → 90 ngày; B lẻ → 180 ngày | B=2 (chẵn) | **90 ngày** |
 
-> ⚠️ 4 số này (4 ngày grace / 4.00% APR / 4.00% penalty / 90 ngày tenor) là số bắt buộc, duy nhất, dùng xuyên suốt toàn bộ code, test, README, và video demo. Không dùng số ví dụ trong đề gốc.
+> 4 số này (4 ngày grace / 4.00% APR / 4.00% penalty / 90 ngày tenor) là số bắt buộc, duy nhất, dùng xuyên suốt toàn bộ code, test, README, và video demo. 
 
-### Ví dụ số tham chiếu (dùng làm test case chuẩn ở Ngày 3)
-
-Gửi **1,000 USDC** vào default plan (90 ngày, APR 4.00%):
-
-```
-interest = (1,000 × 400 × 7,776,000) / (365 × 86,400 × 10,000)
-         = 3,110,400,000,000 / 315,360,000,000
-         ≈ 9.8635 USDC
-→ Rút đúng hạn nhận: 1,009.8635 USDC
-```
-
-Rút sớm với penalty 4.00%:
-
-```
-penalty = 1,000 × 400 / 10,000 = 40 USDC
-→ Rút sớm nhận: 960 USDC (feeReceiver nhận 40 USDC)
-```
 
 ---
 
-## 3. Sequence diagram tay — 5 User Flow (Mục 3)
-
-> Đã vẽ minh họa dạng flowchart để tham khảo (xem lại trong chat). Ghi lại các bước cốt lõi từng luồng dưới đây; nên tự vẽ lại tay theo mẫu để nhớ sâu.
+## 3. 5 User Flow
 
 ### 3.1 Open a Deposit
 1. User → approve token cho contract.
@@ -77,7 +58,7 @@ penalty = 1,000 × 400 / 10,000 = 40 USDC
 1. User gọi `earlyWithdraw(depositId)` trước khi đáo hạn.
 2. Tính `penalty = (principal × penaltyBpsAtOpen) / 10000`.
 3. User nhận `principal - penalty`; penalty chuyển vào `feeReceiver`.
-4. **Không** tính lãi (interest = 0).
+4. Không tính lãi (interest = 0).
 
 ### 3.4 Manual Renew
 1. Từ `maturityAt` trở đi, user gọi `renewDeposit(depositId, newPlanId)`.
@@ -109,11 +90,11 @@ penalty = 1,000 × 400 / 10,000 = 40 USDC
 
 ---
 
-## ✅ Trạng thái hoàn thành Ngày 1
+## Trạng thái hoàn thành Ngày 1
 
-- [x] Danh sách thuật ngữ mơ hồ đã làm rõ
+- [x] Danh sách thuật ngữ
 - [x] Personal Variant đã tính (4 ngày / 4.00% APR / 4.00% penalty / 90 ngày tenor)
-- [x] Sequence diagram 5 flow (tóm tắt bước, đã có bản vẽ minh họa tham khảo)
-- [x] Checklist 7 business rules kèm cách tự kiểm tra
+- [x] 5 flow 
+- [x] Checklist 7 business rules
 
 **Tiếp theo:** Ngày 1 (Phần B) — System Architecture Design → xem `docs/ARCHITECTURE.md`.

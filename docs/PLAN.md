@@ -1,14 +1,10 @@
-# PLAN.md — Kế hoạch làm việc (nội bộ, không nộp)
-
-> File này KHÔNG nằm trong yêu cầu đề bài — chỉ để tự theo dõi tiến độ cá nhân, tách riêng khỏi README.
-> Deadline: 9 ngày làm việc + Ngày 10 báo cáo/vấn đáp.
-> **v2 (cập nhật):** gộp phân tích yêu cầu + thiết kế kiến trúc thành chung 1 ngày (trước đây tách 2 ngày), rút gọn mỗi ngày còn 3-5 nhiệm vụ, dư ra 1 ngày buffer trước ngày báo cáo.
+# PLAN.md — Kế hoạch làm việc
 
 ---
 
-## ✅ Ngày 1 — Requirement Analysis + Architecture Design
+## Ngày 1 — Requirement Analysis + Architecture Design
 
-1. Đọc kỹ đề, làm rõ thuật ngữ mơ hồ, tính Personal Variant theo Student ID
+1. Đọc kỹ đề, làm rõ thuật ngữ, tính Personal Variant theo Student ID
 2. Tóm tắt 5 user flow + checklist 7 business rules
 3. Thiết kế storage layout (struct `Plan`, `Deposit`) + chốt kiến trúc 3 contract tách biệt
 4. Chọn thư viện OpenZeppelin, thiết kế access control, viết chữ ký hàm từng contract
@@ -18,7 +14,7 @@
 
 ---
 
-## ✅ Ngày 2 — Coding Phase 1: MockUSDC + VaultManager + Plan logic
+## Ngày 2 — Coding Phase 1: MockUSDC + VaultManager + Plan logic
 
 1. Code `MockUSDC.sol` (ERC20, 6 decimals, mint tự do)
 2. Code `VaultManager.sol` đầy đủ (fundVault, withdrawVault, `payInterest` chỉ SavingCore gọi được, pause)
@@ -29,7 +25,7 @@
 
 ---
 
-## ⏳ Ngày 3 — Coding Phase 2: Deposit logic
+##  Ngày 3 — Coding Phase 2: Deposit logic
 
 1. Code `openDeposit` (mint NFT, snapshot APR/penalty)
 2. Code `withdrawAtMaturity` — công thức simple interest
@@ -41,7 +37,7 @@
 
 ---
 
-## ⏳ Ngày 4 — Coding Phase 2.5: Renew logic + chuyển sang tư duy audit
+##  Ngày 4 — Coding Phase 2.5: Renew logic + chuyển sang tư duy audit
 
 1. Code `renewDeposit` (manual) + `autoRenewDeposit`
 2. Test nhanh: gọi trước/sau grace period, APR khóa đúng giá trị gốc
@@ -53,7 +49,7 @@
 
 ---
 
-## ⏳ Ngày 5 — Testing + Self-Audit
+##  Ngày 5 — Testing + Self-Audit
 
 1. Quyết định cách setup Hardhat (sau khi hỏi mentor), viết test suite đầy đủ theo checklist tối thiểu Mục 7.2
 2. Chạy coverage, đảm bảo >90%
@@ -64,7 +60,7 @@
 
 ---
 
-## ⏳ Ngày 6 — Design Answers (7 câu hỏi mở)
+##  Ngày 6 — Design Answers (7 câu hỏi mở)
 
 1. Trả lời từng câu: trả lời trực tiếp + trích code + ưu/nhược + đề xuất cải tiến
 2. Đối chiếu câu 2 (Empty vault) và câu 3 (Dead bot) với Creative Challenge đã code
@@ -108,7 +104,7 @@
 
 ---
 
-## ⏳ Ngày 10 — Báo cáo & Vấn đáp
+##  Ngày 10 — Báo cáo & Vấn đáp
 
 1. Đọc lại code 1 lượt cuối, đặc biệt các hàm liên quan 7 câu hỏi mở
 2. Tự mô phỏng vấn đáp với số liệu bị đổi (giáo viên có thể hỏi lại theo hướng khác)
@@ -119,7 +115,3 @@
 
 ---
 
-## Ghi chú
-
-- Buffer time nếu trễ: ưu tiên cắt giảm Frontend (10 điểm) trước, không cắt Ngày 5 (Test + Self-audit) và Ngày 6 (Design Answers) vì 2 ngày này quyết định gần 50% tổng điểm.
-- Mỗi tối tự hỏi: "Hôm nay tôi có thể giải thích miệng (không nhìn code) những gì mình vừa làm không?"

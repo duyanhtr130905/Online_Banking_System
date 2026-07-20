@@ -1,20 +1,19 @@
 # ARCHITECTURE.md — Ngày 1 (Phần B): System Architecture Design
 
-> Term Deposit System — Blockchain Programming Final Project
 > Personal Variant: Grace period 4 ngày · Default APR 4.00% · Penalty 4.00% · Tenor mặc định 90 ngày
 
 ---
 
 ## 1. Quyết định kiến trúc tổng thể
 
-Giữ nguyên **3 contract tách biệt** như đề bài gợi ý, không gộp chung, vì:
+Giữ nguyên **3 contract tách biệt** 
 
-- **Tách trách nhiệm rõ ràng**, giống 3 "phòng ban" của một ngân hàng thật:
-  - `SavingCore` = phòng giao dịch (toàn bộ nghiệp vụ, logic, NFT)
+  - `SavingCore` = toàn bộ nghiệp vụ, logic, NFT
   - `VaultManager` = kho bạc (chỉ giữ và chuyển tiền lãi)
-  - `MockUSDC` = đơn vị phát hành tiền tệ (không liên quan nghiệp vụ)
-- Tách biệt giúp **audit/kiểm tra bảo mật từng phần độc lập** dễ hơn — đặc biệt phần giữ tiền (`VaultManager`) có thể review riêng mà không cần đọc toàn bộ logic nghiệp vụ.
-- Cho phép **thực thi Business Rule #5** ("lãi luôn từ vault") bằng kiến trúc (access control), không chỉ bằng quy ước lỏng lẻo trong code.
+  - `MockUSDC` = đơn vị phát hành tiền tệ 
+  
+Tách biệt giúp **audit/kiểm tra bảo mật từng phần độc lập** dễ hơn 
+Cho phép **thực thi Business Rule #5** ("lãi luôn từ vault") bằng kiến trúc (access control)
 
 ---
 
@@ -147,16 +146,16 @@ function calculatePenalty(uint256 depositId) public view returns (uint256)
 
 ```
                     ┌───────────────┐
-                    │   SavingCore   │
-                    │ Business logic │
-                    │     + NFT      │
+                    │   SavingCore  │
+                    │ Business logic│
+                    │     + NFT     │
                     └───────┬───────┘
                 ┌───────────┴───────────┐
                 ▼                       ▼
       ┌──────────────────┐    ┌──────────────────┐
-      │   VaultManager     │    │     MockUSDC      │
-      │  Vault lãi, tách   │───▶│  ERC20 test token  │
-      │      biệt          │    │                    │
+      │   VaultManager   │    │     MockUSDC     │
+      │  Vault lãi, tách │──> │  ERC20 test token│
+      │      biệt        │    │                  │
       └──────────────────┘    └──────────────────┘
 ```
 
@@ -164,7 +163,7 @@ function calculatePenalty(uint256 depositId) public view returns (uint256)
 
 ---
 
-## 7. Nháp sớm 2 câu hỏi mở liên quan trực tiếp đến kiến trúc
+## 7. Chuẩn bị trước 2 câu hỏi mở liên quan trực tiếp đến kiến trúc
 
 **Câu 1 — Transferable certificate:** Quyền rút tiền gắn với `ownerOf(depositId) == msg.sender`, không gắn với người mở deposit ban đầu. Nếu Alice bán NFT cho Bob, Bob là người rút được tiền.
 Dòng code quyết định: `require(ownerOf(depositId) == msg.sender, "not owner");` ở đầu mỗi hàm rút/renew.

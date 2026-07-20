@@ -1,14 +1,14 @@
 # Báo cáo Ngày 2 — Coding Phase 1/2.5
 
-**Trạng thái:** ✅ 3 file đã viết xong, compile sạch (không lỗi, không cảnh báo — verify bằng `solc` trực tiếp).
+**Trạng thái:** 3 file đã viết xong, compile sạch (không lỗi, không cảnh báo — verify bằng `solc` trực tiếp).
 
-**Phạm vi đã code:** `MockUSDC.sol` (toàn bộ) · `VaultManager.sol` (toàn bộ) · `SavingCore.sol` (khung + Plan management — **chưa** có logic Deposit, để dành Ngày 3-4).
+**Phạm vi đã code:** `MockUSDC.sol` (toàn bộ) · `VaultManager.sol` (toàn bộ) · `SavingCore.sol` (khung + Plan management — **chưa** có logic Deposit).
 
 ---
 
 ## Cách đọc báo cáo này
 
-Với mỗi phần, mình giải thích **3 lớp**: (1) nó làm gì, (2) tại sao viết như vậy chứ không viết cách khác, (3) nó nối lại với quyết định nào ở Ngày 1/2. Đọc xong phần nào, mở file `.sol` tương ứng đọc lại comment trong code — 2 tài liệu này bổ sung cho nhau, không trùng lặp hoàn toàn.
+Với mỗi phần, giải thích **3 lớp**: (1) nó làm gì, (2) tại sao viết như vậy chứ không viết cách khác, (3) nó nối lại với quyết định nào ở Ngày 1/2. Đọc xong phần nào, mở file `.sol` tương ứng đọc lại comment trong code — 2 tài liệu này bổ sung cho nhau, không trùng lặp hoàn toàn.
 
 ---
 
@@ -110,24 +110,13 @@ Hàm này **chỉ đổi 1 field duy nhất** (`enabled`), không hề chạm v�
 
 | # | Invariant | Trạng thái sau Ngày 2 |
 |---|---|---|
-| 1 | APR & penalty snapshot | ⚙️ Đã có **chỗ chứa** (`aprBpsAtOpen`, `penaltyBpsAtOpen` trong struct), nhưng **chưa có logic gán giá trị** — sẽ code ở `openDeposit()` Ngày 3 |
-| 2 | Simple interest | ⏳ Chưa code — thuộc Ngày 3 |
-| 3 | Rút sớm = lãi 0 | ⏳ Chưa code — thuộc Ngày 3 |
-| 4 | Auto-renew giữ APR gốc | ⏳ Chưa code — thuộc Ngày 4 |
-| 5 | Lãi luôn từ vault | ✅ **Đã hoàn thành** — `payInterest` với `onlyCore` + kiểm tra số dư |
-| 6 | Pause chặn rút/renew | ⚙️ Đã có modifier `whenNotPaused` sẵn sàng, sẽ gắn vào các hàm rút/renew ở Ngày 3-4 |
-| 7 | Admin không sửa deposit đã mở | ✅ **Đã hoàn thành** — không hàm admin nào trong Ngày 2 động đến `deposits[...]` |
-
----
-
-## 5. Câu hỏi tự kiểm tra trước khi qua Ngày 3
-
-Thử tự trả lời (không nhìn code) — nếu trả lời được hết, bạn đã thật sự hiểu Ngày 2, không chỉ "code chạy được":
-
-1. Nếu bạn xóa dòng `require(msg.sender == coreAddress, ...)` trong `VaultManager`, hậu quả cụ thể là gì?
-2. Vì sao `Deposit` struct cần 2 trường `aprBpsAtOpen`/`penaltyBpsAtOpen` riêng, thay vì chỉ lưu `planId` rồi tra cứu lại?
-3. `immutable` khác gì với biến thường? Vì sao `token` và `vault` được khai báo `immutable`?
-4. Modifier `onlyCore` và `onlyRole(ADMIN_ROLE)` khác nhau ở điểm nào về **đối tượng** được phép gọi?
+| 1 | APR & penalty snapshot | Đã có **chỗ chứa** (`aprBpsAtOpen`, `penaltyBpsAtOpen` trong struct), nhưng **chưa có logic gán giá trị** — sẽ code ở `openDeposit()` Ngày 3 |
+| 2 | Simple interest | Chưa code |
+| 3 | Rút sớm = lãi 0 | Chưa code |
+| 4 | Auto-renew giữ APR gốc | Chưa code |
+| 5 | Lãi luôn từ vault | Đã hoàn thành — `payInterest` với `onlyCore` + kiểm tra số dư |
+| 6 | Pause chặn rút/renew | Đã có modifier `whenNotPaused` sẵn sàng, sẽ gắn vào các hàm rút/renew ở Ngày 3-4 |
+| 7 | Admin không sửa deposit đã mở | Đã hoàn thành — không hàm admin nào trong Ngày 2 động đến `deposits[...]` |
 
 ---
 
@@ -139,4 +128,3 @@ Thử tự trả lời (không nhìn code) — nếu trả lời được hết,
 
 **Đã verify compile thành công bằng `solc`, không lỗi không cảnh báo.** (Lưu ý: khi bạn setup Hardhat ở máy của mình để chạy test sau này ở Ngày 5, cần chạy `npm install --save-dev hardhat @openzeppelin/contracts` và `npx hardhat compile` lại — môi trường ở đây dùng `solc` trực tiếp chỉ để nhanh chóng kiểm tra cú pháp, không thay thế hoàn toàn cho Hardhat.)
 
-**Tiếp theo:** Ngày 3 — code `openDeposit`, `withdrawAtMaturity`, `earlyWithdraw` (phần math-heavy nhất, chiếm 20 điểm riêng).
