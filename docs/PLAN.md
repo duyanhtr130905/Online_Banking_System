@@ -71,7 +71,7 @@
 
 ---
 
-## ⏳ Ngày 7 — Frontend + Testnet Deploy
+## Ngày 7 — Frontend + Testnet Deploy
 
 1. Deploy 3 contract lên testnet, verify trên block explorer
 2. Dựng React frontend: connect MetaMask, view plan, open/withdraw/renew deposit
@@ -82,7 +82,7 @@
 
 ---
 
-## ⏳ Ngày 8 — Review toàn diện + Video Demo
+## Ngày 8 — Review toàn diện + Video Demo
 
 1. Review chéo README theo checklist Mục 11 đề bài
 2. Chạy lại test suite + coverage lần cuối
@@ -94,7 +94,7 @@
 
 ---
 
-## ⏳ Ngày 9 — Buffer / Dự phòng
+## Ngày 9 — Buffer / Dự phòng
 
 1. Dùng bù tiến độ nếu có ngày nào bị trễ
 2. Nếu đúng tiến độ: làm thêm Creative Challenge thứ 3, hoặc polish code quality/frontend

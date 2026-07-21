@@ -34,6 +34,12 @@ contract SavingCore is ERC721, AccessControl, Pausable, ReentrancyGuard {
     // Địa chỉ nhận tiền phạt khi user rút sớm.
     address public feeReceiver;
 
+    // Khoảng thời gian "ân hạn" (tính bằng giây) sau khi đáo hạn mà deposit vẫn chưa bị
+    // auto-renew. Trong khoảng này user có thể tự renewDeposit hoặc withdrawAtMaturity.
+    // Chỉ sau khi vượt quá (maturityAt + gracePeriodSeconds) thì bot mới được phép
+    // gọi autoRenewDeposit - ngăn bot chạy tranh trước khi user kịp phản ứng.
+    uint256 public gracePeriodSeconds;
+
     // ==================== STATE: PLAN ====================
 
     /**
@@ -108,17 +114,25 @@ contract SavingCore is ERC721, AccessControl, Pausable, ReentrancyGuard {
      * @param _depositToken Địa chỉ MockUSDC dùng làm tiền gốc
      * @param _vault Địa chỉ VaultManager đã deploy trước đó
      * @param _feeReceiver Địa chỉ nhận phạt rút sớm ban đầu
+     * @param _gracePeriodSeconds Thời gian ân hạn (giây) sau đáo hạn trước khi bot được auto-renew
      */
-    constructor(address _depositToken, address _vault, address _feeReceiver)
+    constructor(
+        address _depositToken,
+        address _vault,
+        address _feeReceiver,
+        uint256 _gracePeriodSeconds
+    )
         ERC721("Term Deposit Certificate", "TDC")
     {
         require(_depositToken != address(0), "token address is zero");
         require(_vault != address(0), "vault address is zero");
         require(_feeReceiver != address(0), "fee receiver is zero");
+        require(_gracePeriodSeconds > 0, "grace period must be > 0");
 
         depositToken = IERC20(_depositToken);
         vault = VaultManager(_vault);
         feeReceiver = _feeReceiver;
+        gracePeriodSeconds = _gracePeriodSeconds;
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(ADMIN_ROLE, msg.sender);
@@ -202,6 +216,17 @@ contract SavingCore is ERC721, AccessControl, Pausable, ReentrancyGuard {
     function setFeeReceiver(address receiver) external onlyRole(ADMIN_ROLE) {
         require(receiver != address(0), "fee receiver is zero");
         feeReceiver = receiver;
+    }
+
+    /**
+     * @notice Cập nhật thời gian ân hạn sau khi deposit đáo hạn.
+     * @dev Chỉ ADMIN_ROLE mới được gọi. Thời gian > 0 là bắt buộc - nếu = 0 thì bot có thể
+     *      gọi autoRenewDeposit ngay tức thì sau maturityAt, không cho user thời gian phản ứng.
+     * @param newGracePeriodSeconds Giá trị mới tính bằng giây.
+     */
+    function setGracePeriod(uint256 newGracePeriodSeconds) external onlyRole(ADMIN_ROLE) {
+        require(newGracePeriodSeconds > 0, "grace period must be > 0");
+        gracePeriodSeconds = newGracePeriodSeconds;
     }
 
     function pause() external onlyRole(ADMIN_ROLE) {
@@ -456,7 +481,191 @@ contract SavingCore is ERC721, AccessControl, Pausable, ReentrancyGuard {
         emit Withdrawn(depositId, msg.sender, payout, 0, true);
     }
 
-    // ==================== NGÀY 5+ SẼ BỔ SUNG TẠI ĐÂY ====================
-    // function renewDeposit(...)
-    // function autoRenewDeposit(...)
+    // ==================== NGÀY 5: RENEW LOGIC ====================
+
+    /**
+     * @notice Gia hạn thủ công (Manual Renew): chủ sở hữu NFT tự chọn gói plan mới,
+     *         gộp lãi vào vốn, mở khoản tiết kiệm mới ngay sau khi đáo hạn.
+     * @dev Chỉ OWNER của depositId được gọi - đây là renew chủ động, user tự quyết định.
+     *      Luồng CEI:
+     *        1. CHECK:   ownerOf, status Active, đã đáo hạn, plan mới enabled, principal hợp lệ.
+     *        2. EFFECTS: đổi status deposit cũ, ghi deposit mới.
+     *        3. INTERACTIONS: vault.payInterest → _safeMint (đặt cuối cùng vì _safeMint
+     *           có thể gọi onERC721Received() trên smart contract, tạo vector reentrancy;
+     *           state phải hoàn toàn ổn định TRƯỚC khi mint - học từ bài học openDeposit).
+     * @param depositId  ID của khoản deposit cũ cần gia hạn.
+     * @param newPlanId  ID của gói tiết kiệm mới user muốn chuyển sang.
+     * @return newDepositId  ID của khoản deposit mới vừa tạo.
+     */
+    function renewDeposit(uint256 depositId, uint256 newPlanId)
+        external
+        nonReentrant
+        whenNotPaused
+        returns (uint256 newDepositId)
+    {
+        // CHECK 1: Chỉ chủ sở hữu NFT mới được renew thủ công.
+        require(ownerOf(depositId) == msg.sender, "not owner");
+
+        // CHECK 2: Deposit phải đang ở trạng thái Active.
+        require(deposits[depositId].status == Status.Active, "not active");
+
+        // CHECK 3: Phải đã qua (hoặc đúng) thời điểm đáo hạn - renew trước hạn không hợp lệ.
+        require(block.timestamp >= deposits[depositId].maturityAt, "not matured yet");
+
+        // Đọc plan MỚI mà user muốn chuyển sang.
+        Plan storage newPlan = plans[newPlanId];
+
+        // CHECK 4: Plan mới BẮT BUỘC phải enabled.
+        //          Lý do: renewDeposit là hành động CHỦ ĐỘNG - user tự chọn plan mới, đây là
+        //          cam kết mới giữa user và hệ thống. Admin disable plan = tuyên bố "gói này
+        //          không nhận khách mới". Do đó, dù là renew hay mở mới, cũng phải check enabled.
+        //          (Khác với autoRenewDeposit - xem giải thích tại hàm đó.)
+        require(newPlan.enabled, "new plan is not enabled");
+
+        // Tính lãi từ deposit cũ (dùng lại calculateInterest - đọc aprBpsAtOpen snapshot, không
+        // đọc plans[...].aprBps hiện tại, đảm bảo Business Rule #1).
+        uint256 interest = calculateInterest(depositId);
+
+        // newPrincipal = vốn cũ + lãi gộp vào (compound into new deposit).
+        uint256 newPrincipal = deposits[depositId].principal + interest;
+
+        // CHECK 5: newPrincipal phải nằm trong khoảng [minDeposit, maxDeposit] của plan mới.
+        //          Tương tự check trong openDeposit - đảm bảo deposit mới tuân thủ giới hạn
+        //          của gói plan mà user đã chọn.
+        require(newPrincipal >= newPlan.minDeposit, "newPrincipal below minDeposit");
+        require(
+            newPlan.maxDeposit == 0 || newPrincipal <= newPlan.maxDeposit,
+            "newPrincipal above maxDeposit"
+        );
+
+        // EFFECTS (1/3): Đánh dấu deposit CŨ là ManualRenewed - bắt buộc làm TRƯỚC interactions.
+        //                Ngăn reentrancy đọc lại deposit cũ ở trạng thái Active.
+        deposits[depositId].status = Status.ManualRenewed;
+
+        // INTERACTIONS (1/3): Rút phần lãi từ VaultManager về CONTRACT NÀY (không phải user).
+        //   Lý do: newPrincipal (vốn mới) = vốn cũ + lãi. Vốn cũ đã nằm sẵn trong contract.
+        //   Nhưng phần lãi đang nằm trong VaultManager. Cần kéo phần lãi về SavingCore để
+        //   contract này "backing" đủ newPrincipal cho deposit mới - không thiếu hụt tài sản.
+        vault.payInterest(address(this), interest);
+
+        // EFFECTS (2/3): Cấp phát depositId mới.
+        newDepositId = _nextDepositId++;
+
+        // EFFECTS (3/3): Ghi thông tin deposit mới với SNAPSHOT theo plan MỚI.
+        //   aprBpsAtOpen = newPlan.aprBps: đây là cam kết MỚI - user đã chủ động chọn plan mới,
+        //   nên APR cam kết theo plan mới tại thời điểm renew, không giữ APR cũ.
+        //   (Khác hoàn toàn với autoRenewDeposit - xem giải thích tại hàm đó.)
+        deposits[newDepositId] = Deposit({
+            planId: newPlanId,
+            principal: newPrincipal,
+            maturityAt: block.timestamp + uint256(newPlan.tenorDays) * 1 days,
+            aprBpsAtOpen: newPlan.aprBps,                       // SNAPSHOT theo plan MỚI
+            penaltyBpsAtOpen: newPlan.earlyWithdrawPenaltyBps, // SNAPSHOT theo plan MỚI
+            status: Status.Active
+        });
+
+        // INTERACTIONS (2/3): Mint NFT chứng chỉ mới cho user - ĐẶT CUỐI CÙNG.
+        //   _safeMint có thể gọi onERC721Received() nếu msg.sender là smart contract,
+        //   tạo cơ hội reentrancy. Mọi effects và interactions khác phải xong trước khi mint.
+        _safeMint(msg.sender, newDepositId);
+
+        emit Renewed(depositId, newDepositId, newPrincipal, newPlanId);
+    }
+
+    /**
+     * @notice Gia hạn tự động (Auto Renew): BẤT KỲ AI cũng có thể gọi để gia hạn hộ user
+     *         sau khi hết thời gian ân hạn (gracePeriodSeconds), giữ nguyên plan cũ.
+     * @dev THIẾT KẾ CÓ CHỦ ĐÍCH - không check ownerOf(depositId) == msg.sender:
+     *      Mục đích là cho phép bot (hoặc bất kỳ địa chỉ nào) tự động kích hoạt renew
+     *      khi user quên không xử lý deposit đã đáo hạn. Đây là quyết định thiết kế từ
+     *      Ngày 1, không phải thiếu sót bảo mật - user đã "đồng ý" điều này khi chọn plan
+     *      có tính năng auto-renew.
+     *
+     *      THIẾT KẾ CÓ CHỦ ĐÍCH - không check plans[planId].enabled:
+     *      Auto-renew là tiếp tục THỤ ĐỘNG plan cũ - không phải cam kết mới do user chọn.
+     *      Admin disable plan = "không nhận khách MỞ MỚI", không có nghĩa là hủy bỏ
+     *      các deposit đang chạy. Nếu check enabled thì bot sẽ không thể renew các deposit
+     *      của plan đã bị disable, để lại deposit "mắc kẹt" - trải nghiệm xấu cho user.
+     *      (Khớp với comment trong disablePlan(): không ảnh hưởng deposit đang active.)
+     *
+     *      Luồng CEI tương tự renewDeposit, với điểm khác biệt quan trọng:
+     *      - Lưu owner TRƯỚC khi đổi status vì msg.sender KHÔNG PHẢI owner.
+     *      - Mint NFT mới cho owner đã lưu, không phải msg.sender.
+     * @param depositId  ID của khoản deposit cần được auto-renew.
+     * @return newDepositId  ID của khoản deposit mới vừa tạo.
+     */
+    function autoRenewDeposit(uint256 depositId)
+        external
+        nonReentrant
+        whenNotPaused
+        returns (uint256 newDepositId)
+    {
+        // CHECK 1: Deposit phải đang Active.
+        require(deposits[depositId].status == Status.Active, "not active");
+
+        // CHECK 2: Phải đã qua (maturityAt + gracePeriodSeconds).
+        //          gracePeriodSeconds tạo "khoảng đệm" sau đáo hạn để user tự xử lý trước;
+        //          bot chỉ được phép can thiệp SAU khi khoảng đệm này đã hết.
+        require(
+            block.timestamp >= deposits[depositId].maturityAt + gracePeriodSeconds,
+            "grace period not passed yet"
+        );
+
+        // KHÔNG check plans[planId].enabled - xem giải thích chi tiết trong @dev của hàm.
+
+        // Lưu owner TRƯỚC khi đổi status.
+        //   Lý do: msg.sender trong hàm này là bot/bên thứ ba, KHÔNG PHẢI chủ sở hữu NFT.
+        //   Sau khi đổi status (EFFECTS bên dưới), ownerOf vẫn trả đúng vì NFT chưa burn,
+        //   nhưng đọc trước để code rõ ràng về intent và an toàn trong mọi tình huống.
+        address owner = ownerOf(depositId);
+
+        // Tính lãi từ deposit cũ (đọc aprBpsAtOpen snapshot - đúng Business Rule #1).
+        uint256 interest = calculateInterest(depositId);
+
+        // newPrincipal = vốn cũ + lãi gộp vào.
+        uint256 newPrincipal = deposits[depositId].principal + interest;
+
+        // EFFECTS (1/3): Đánh dấu deposit CŨ là AutoRenewed trước mọi interactions.
+        deposits[depositId].status = Status.AutoRenewed;
+
+        // INTERACTIONS (1/3): Kéo lãi từ VaultManager về SavingCore - giống renewDeposit,
+        //   để contract này backing đủ newPrincipal cho deposit mới.
+        vault.payInterest(address(this), interest);
+
+        // EFFECTS (2/3): Cấp phát depositId mới.
+        newDepositId = _nextDepositId++;
+
+        // EFFECTS (3/3): Ghi thông tin deposit mới - GIỮ NGUYÊN plan cũ và APR gốc.
+        //
+        //   [BUSINESS RULE #4 - QUAN TRỌNG NHẤT CỦA HÀM NÀY]
+        //   aprBpsAtOpen = deposits[depositId].aprBpsAtOpen  (KHÔNG phải plans[...].aprBps)
+        //
+        //   Lý do: Auto-renew là tiếp tục thụ động cùng 1 cam kết ban đầu của user với hệ thống.
+        //   User đã được hứa hẹn mức APR khi mở deposit lần đầu. Nếu đọc plans[...].aprBps
+        //   hiện tại, admin có thể lách luật: hạ APR của plan xuống thấp, sau đó để bot
+        //   auto-renew để user bị "khóa" ở mức APR thấp mà không hề hay biết.
+        //   Giữ nguyên aprBpsAtOpen = bảo vệ user theo đúng điều khoản họ đã ký ban đầu.
+        //
+        //   Tương tự: penaltyBpsAtOpen cũng giữ nguyên để bảo vệ user toàn diện,
+        //   không chỉ riêng APR (nhất quán với tinh thần snapshot của Business Rule #1).
+        //
+        //   planId: giữ nguyên plan cũ (deposits[depositId].planId), KHÔNG đổi plan.
+        //   tenorDays: đọc từ plans[deposits[depositId].planId].tenorDays - hợp lệ vì
+        //   tenorDays của Plan không có hàm update, nên không cần snapshot riêng.
+        deposits[newDepositId] = Deposit({
+            planId:          deposits[depositId].planId,
+            principal:       newPrincipal,
+            maturityAt:      block.timestamp + uint256(plans[deposits[depositId].planId].tenorDays) * 1 days,
+            aprBpsAtOpen:    deposits[depositId].aprBpsAtOpen,    // GIỮ APR GỐC - Business Rule #4
+            penaltyBpsAtOpen: deposits[depositId].penaltyBpsAtOpen, // GIỮ penalty gốc - nhất quán
+            status:          Status.Active
+        });
+
+        // INTERACTIONS (2/3): Mint NFT mới cho OWNER đã lưu ở trên - ĐẶT CUỐI CÙNG.
+        //   Mint cho owner (không phải msg.sender) vì đây là hành động thay mặt user.
+        //   Đặt cuối cùng để tránh reentrancy qua onERC721Received() - giống renewDeposit.
+        _safeMint(owner, newDepositId);
+
+        emit Renewed(depositId, newDepositId, newPrincipal, deposits[depositId].planId);
+    }
 }
