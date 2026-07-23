@@ -1,0 +1,63 @@
+/* ── MyDeposits styles ── */
+
+.my-deposits-section {
+  background: var(--bg-card);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  animation: fadeIn 0.4s ease-out;
+}
+
+.my-deposits-empty {
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-align: center;
+  padding: 32px 0;
+}
+
+.my-deposits-warning {
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.08);
+  color: #b45309;
+  font-size: 13px;
+}
+
+.deposit-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.deposit-tab {
+  padding: 9px 12px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.deposit-tab-active {
+  border-bottom-color: var(--accent);
+  color: var(--accent);
+}
+
+.deposits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 480px) {
+  .deposits-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -10,11 +10,12 @@ dotenv.config();
 
 const { TESTNET_PRIVATE_KEY: testnetPrivateKey } = process.env;
 const reportGas = process.env.REPORT_GAS;
+const etherscanApiKey = process.env.ETHERSCAN_API_KEY || "";
 
 module.exports = {
   networks: {
     sepolia: {
-      url: "https://eth-sepolia.public.blastapi.io",
+      url: "https://ethereum-sepolia-rpc.publicnode.com",
       chainId: 11155111,
       accounts: testnetPrivateKey ? [testnetPrivateKey] : [],
       timeout: 40000,
@@ -57,5 +58,8 @@ module.exports = {
   typechain: {
     outDir: "typechain",
     target: "ethers-v6",
+  },
+  etherscan: {
+    apiKey: etherscanApiKey,
   },
 };

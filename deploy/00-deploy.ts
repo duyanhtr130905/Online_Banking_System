@@ -36,6 +36,31 @@ const deployFn: DeployFunction = async function (hre: HardhatRuntimeEnvironment)
   console.log("Deployed VaultManager:", vaultManager.address);
   console.log("Deployed SavingCore:", savingCore.address);
   console.log("VaultManager.coreAddress set to SavingCore");
+
+  // 5. Tạo Default Plan theo Personal Variant (90 ngày / 400 bps APR / 400 bps penalty)
+  const savingCoreContract = await hre.ethers.getContractAt("SavingCore", savingCore.address);
+
+  // Kiểm tra plan 0 đã tồn tại chưa (tránh tạo trùng nếu script chạy lại lần 2 trên cùng network)
+  let planExists = false;
+  try {
+    await savingCoreContract.getPlan(0);
+    planExists = true;
+  } catch {
+    planExists = false;
+  }
+
+  if (!planExists) {
+    const tenorDays = 90;
+    const aprBps = 400;
+    const penaltyBps = 400;
+    const minDeposit = 0;
+    const maxDeposit = 0;
+    const txPlan = await savingCoreContract.createPlan(tenorDays, aprBps, penaltyBps, minDeposit, maxDeposit);
+    await txPlan.wait();
+    console.log("Default Plan created: 90 days / 400bps APR / 400bps penalty");
+  } else {
+    console.log("Default Plan already exists, skip creating");
+  }
 };
 
 export default deployFn;

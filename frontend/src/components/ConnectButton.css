@@ -1,0 +1,133 @@
+/* ---------- Connect Button ---------- */
+.connect-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.connect-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.connect-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.45);
+}
+
+.connect-btn:active {
+  transform: translateY(0);
+}
+
+/* ---------- Connected Pill ---------- */
+.connect-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e1b4b;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.connect-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.connect-addr {
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  letter-spacing: 0.02em;
+}
+
+.connect-sep {
+  color: #a5b4c3;
+}
+
+.connect-network {
+  color: #6366f1;
+  font-weight: 600;
+}
+
+/* ---------- Unsupported Network Banner ---------- */
+.connect-unsupported {
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: "Inter", sans-serif;
+  line-height: 1.5;
+  max-width: 400px;
+  text-align: right;
+  animation: slideDown 0.3s ease-out;
+}
+
+.switch-network-btn {
+  display: block;
+  margin: 8px 0 0 auto;
+  padding: 6px 10px;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 7px;
+  background: #fff;
+  color: #dc2626;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Error ---------- */
+.connect-error {
+  color: #dc2626;
+  font-size: 12px;
+  font-family: "Inter", sans-serif;
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .connect-pill { gap: 5px; padding: 7px 10px; }
+  .connect-network, .connect-sep { display: none; }
+  .connect-unsupported { max-width: 260px; }
+}
