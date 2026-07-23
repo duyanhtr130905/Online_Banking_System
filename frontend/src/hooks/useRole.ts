@@ -4,11 +4,15 @@ import type { Contract } from "ethers";
 export function useRole(savingCore: Contract | null, account: string | null) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [checkedAccount, setCheckedAccount] = useState<string | null>(null);
+  const [checkedContract, setCheckedContract] = useState<Contract | null>(null);
 
   useEffect(() => {
     if (!savingCore || !account) {
       setIsAdmin(false);
       setLoading(false);
+      setCheckedAccount(account);
+      setCheckedContract(savingCore);
       return;
     }
     let cancelled = false;
@@ -21,11 +25,16 @@ export function useRole(savingCore: Contract | null, account: string | null) {
       } catch {
         if (!cancelled) setIsAdmin(false);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setCheckedAccount(account);
+          setCheckedContract(savingCore);
+          setLoading(false);
+        }
       }
     })();
     return () => { cancelled = true; };
   }, [savingCore, account]);
 
-  return { isAdmin, loading };
+  const isCurrentRole = checkedAccount === account && checkedContract === savingCore;
+  return { isAdmin: isCurrentRole ? isAdmin : false, loading: isCurrentRole ? loading : true };
 }

@@ -14,6 +14,7 @@ export function useWallet() {
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
   const [signer, setSigner] = useState<JsonRpcSigner | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [changingAccount, setChangingAccount] = useState(false);
 
   const resetWallet = useCallback(() => {
     setAccount(null);
@@ -53,6 +54,53 @@ export function useWallet() {
       setError(err instanceof Error ? err.message : "Kết nối thất bại");
     }
   }, [resetWallet, syncAccount]);
+
+  const changeAccount = useCallback(async () => {
+    const eth = (window as Window & { ethereum?: EthereumProvider }).ethereum;
+    if (!eth) {
+      setError("Không tìm thấy MetaMask. Vui lòng cài đặt extension MetaMask.");
+      return;
+    }
+    if (changingAccount) return;
+    setError(null);
+    setChangingAccount(true);
+    try {
+      const permissions = await eth.request({
+        method: "wallet_requestPermissions",
+        params: [{ eth_accounts: {} }],
+      }) as Array<{ parentCapability?: string }>;
+      if (!permissions.some((permission) => permission.parentCapability === "eth_accounts")) {
+        throw new Error("MetaMask không cấp quyền truy cập tài khoản.");
+      }
+      const accounts = await eth.request({ method: "eth_accounts" }) as string[];
+      if (accounts.length === 0) {
+        resetWallet();
+        return;
+      }
+      await syncAccount(eth, accounts[0]);
+    } catch (err) {
+      const code = typeof err === "object" && err !== null && "code" in err
+        ? (err as { code?: number }).code
+        : undefined;
+      if (code === -32601 || code === 4200) {
+        try {
+          // Chỉ fallback trong thao tác click trực tiếp; không tự bật popup khi account/chain thay đổi.
+          const accounts = await eth.request({ method: "eth_requestAccounts" }) as string[];
+          if (accounts.length === 0) resetWallet();
+          else await syncAccount(eth, accounts[0]);
+        } catch (fallbackError) {
+          const fallbackCode = typeof fallbackError === "object" && fallbackError !== null && "code" in fallbackError
+            ? (fallbackError as { code?: number }).code
+            : undefined;
+          setError(fallbackCode === 4001 ? "Bạn đã từ chối chọn tài khoản trong MetaMask." : "Không thể mở màn hình chọn tài khoản của MetaMask.");
+        }
+      } else {
+        setError(code === 4001 ? "Bạn đã từ chối chọn tài khoản trong MetaMask." : "Không thể đổi tài khoản. Vui lòng thử lại trong MetaMask.");
+      }
+    } finally {
+      setChangingAccount(false);
+    }
+  }, [changingAccount, resetWallet, syncAccount]);
 
   const switchToSepolia = useCallback(async () => {
     const eth = (window as Window & { ethereum?: EthereumProvider }).ethereum;
@@ -114,7 +162,9 @@ export function useWallet() {
     provider,
     signer,
     connect,
+    changeAccount,
     switchToSepolia,
+    changingAccount,
     error,
   };
 }

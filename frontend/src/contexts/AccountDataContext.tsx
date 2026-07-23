@@ -23,9 +23,11 @@ export function AccountDataProvider({ children }: { children: ReactNode }) {
   const { account } = useWalletContext();
   const deposits = useMyDeposits();
   const [usdcBalance, setUsdcBalance] = useState<bigint | null>(null);
+  const [balanceAccount, setBalanceAccount] = useState<string | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [balanceError, setBalanceError] = useState<string | null>(null);
   const mountedRef = useRef(true);
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -33,9 +35,11 @@ export function AccountDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshBalance = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     if (!contracts || !account) {
       if (mountedRef.current) {
         setUsdcBalance(null);
+        setBalanceAccount(null);
         setBalanceError(null);
       }
       return;
@@ -44,21 +48,31 @@ export function AccountDataProvider({ children }: { children: ReactNode }) {
     setBalanceError(null);
     try {
       const nextBalance = await contracts.mockUSDC.balanceOf(account);
-      if (mountedRef.current) setUsdcBalance(BigInt(nextBalance));
+      if (mountedRef.current && requestId === requestIdRef.current) {
+        setUsdcBalance(BigInt(nextBalance));
+        setBalanceAccount(account);
+      }
     } catch {
-      if (mountedRef.current) {
+      if (mountedRef.current && requestId === requestIdRef.current) {
         setBalanceError("Không thể cập nhật số dư USDC mới. Dữ liệu hiện có vẫn đang được hiển thị.");
       }
     } finally {
-      if (mountedRef.current) setBalanceLoading(false);
+      if (mountedRef.current && requestId === requestIdRef.current) setBalanceLoading(false);
     }
+  }, [account, contracts]);
+
+  useEffect(() => {
+    requestIdRef.current += 1;
+    setUsdcBalance(null);
+    setBalanceAccount(null);
+    setBalanceError(null);
   }, [account, contracts]);
 
   useEffect(() => { refreshBalance(); }, [refreshBalance]);
 
   return (
     <AccountDataContext.Provider value={{
-      usdcBalance,
+      usdcBalance: balanceAccount === account ? usdcBalance : null,
       balanceLoading,
       balanceError,
       refreshBalance,

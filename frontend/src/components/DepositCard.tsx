@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { formatUnits } from "ethers";
+import { formatUnits, isAddress, ZeroAddress } from "ethers";
 import { useContracts } from "../hooks/useContracts";
 import { useWalletContext } from "../contexts/WalletContext";
 import { usePlansContext } from "../contexts/PlansContext";
@@ -12,6 +12,7 @@ interface DepositCardProps {
   deposit: Deposit;
   plan: Plan | undefined;
   onActionSuccess: () => Promise<void>;
+  onTransferSuccess: (txHash: string) => void;
 }
 
 const statusLabels: Record<DepositStatus, string> = {
@@ -21,9 +22,9 @@ const statusLabels: Record<DepositStatus, string> = {
   [DepositStatus.AutoRenewed]: "Đã tự động gia hạn",
 };
 
-export function DepositCard({ deposit, plan, onActionSuccess }: DepositCardProps) {
+export function DepositCard({ deposit, plan, onActionSuccess, onTransferSuccess }: DepositCardProps) {
   const contracts = useContracts();
-  const { provider } = useWalletContext();
+  const { account, provider } = useWalletContext();
   const { plans } = usePlansContext();
   const [now, setNow] = useState(0);
   const [gracePeriodSeconds, setGracePeriodSeconds] = useState<bigint | null>(null);
@@ -35,6 +36,10 @@ export function DepositCard({ deposit, plan, onActionSuccess }: DepositCardProps
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [renewPlanId, setRenewPlanId] = useState("");
+  const [isTransferOpen, setIsTransferOpen] = useState(false);
+  const [transferReceiver, setTransferReceiver] = useState("");
+  const [transferReceiverError, setTransferReceiverError] = useState<string | null>(null);
+  const [isTransferConfirmation, setIsTransferConfirmation] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const enabledPlans = useMemo(() => plans.filter((item) => item.enabled), [plans]);
@@ -171,6 +176,75 @@ export function DepositCard({ deposit, plan, onActionSuccess }: DepositCardProps
     );
   }
 
+  function validateReceiver(): string | null {
+    const receiver = transferReceiver.trim();
+    if (!isAddress(receiver)) return "Địa chỉ người nhận không hợp lệ.";
+    if (receiver.toLowerCase() === ZeroAddress.toLowerCase()) return "Không thể chuyển NFT đến địa chỉ zero.";
+    if (!account || receiver.toLowerCase() === account.toLowerCase()) return "Không thể chuyển NFT đến chính tài khoản hiện tại.";
+    return null;
+  }
+
+  function openTransferDialog() {
+    setTransferReceiver("");
+    setTransferReceiverError(null);
+    setIsTransferConfirmation(false);
+    setIsTransferOpen(true);
+  }
+
+  function closeTransferDialog() {
+    if (submitting) return;
+    setIsTransferOpen(false);
+    setIsTransferConfirmation(false);
+    setTransferReceiverError(null);
+  }
+
+  function handleTransferContinue() {
+    const validationError = validateReceiver();
+    setTransferReceiverError(validationError);
+    if (!validationError) setIsTransferConfirmation(true);
+  }
+
+  async function handleTransferConfirm() {
+    if (!contracts || !account || !isActive || submitting) return;
+    const validationError = validateReceiver();
+    setTransferReceiverError(validationError);
+    if (validationError) {
+      setIsTransferConfirmation(false);
+      return;
+    }
+
+    const receiver = transferReceiver.trim();
+    setError(null);
+    setSuccess(null);
+    setSubmitting(true);
+    try {
+      // Đọc owner ngay trước khi gửi để không dựa vào account đã mở deposit ban đầu.
+      const owner: string = await contracts.savingCore.ownerOf(deposit.depositId);
+      if (owner.toLowerCase() !== account.toLowerCase()) {
+        setError("Bạn không còn là chủ sở hữu NFT của deposit này.");
+        return;
+      }
+      setActionStatus("Đang chờ MetaMask xác nhận chuyển NFT...");
+      const tx = await contracts.savingCore["safeTransferFrom(address,address,uint256)"](
+        account,
+        receiver,
+        deposit.depositId,
+      );
+      setActionStatus("Đang chờ giao dịch chuyển NFT được xác nhận...");
+      await tx.wait();
+      onTransferSuccess(tx.hash);
+      setActionStatus(null);
+      setIsTransferOpen(false);
+      setIsTransferConfirmation(false);
+      await onActionSuccess();
+    } catch (err) {
+      setActionStatus(null);
+      setError(extractError(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   const maturityDate = new Date(maturityAt * 1000).toLocaleString("vi-VN", {
     day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
   });
@@ -241,6 +315,44 @@ export function DepositCard({ deposit, plan, onActionSuccess }: DepositCardProps
               {submitting ? "Đang xử lý..." : "⚠️ Rút sớm"}
             </button>
           )}
+          <button className="btn-withdraw btn-transfer" onClick={openTransferDialog} disabled={submitting}>
+            {submitting ? "Đang xử lý..." : "Chuyển NFT"}
+          </button>
+        </div>
+      )}
+
+      {isTransferOpen && (
+        <div className="transfer-modal-backdrop" role="presentation" onMouseDown={closeTransferDialog}>
+          <div className="transfer-modal" role="dialog" aria-modal="true" aria-labelledby={`transfer-title-${deposit.depositId}`} onMouseDown={(event) => event.stopPropagation()}>
+            <div className="transfer-modal-header">
+              <h3 id={`transfer-title-${deposit.depositId}`}>Chuyển NFT chứng chỉ</h3>
+              <button className="transfer-modal-close" onClick={closeTransferDialog} disabled={submitting} aria-label="Đóng">×</button>
+            </div>
+            {!isTransferConfirmation ? (
+              <>
+                <label className="transfer-label" htmlFor={`transfer-receiver-${deposit.depositId}`}>Địa chỉ người nhận</label>
+                <input id={`transfer-receiver-${deposit.depositId}`} className="transfer-input" value={transferReceiver} onChange={(event) => { setTransferReceiver(event.target.value); setTransferReceiverError(null); }} placeholder="0x..." autoComplete="off" disabled={submitting} />
+                {transferReceiverError && <p className="transfer-input-error">{transferReceiverError}</p>}
+                <div className="transfer-modal-actions">
+                  <button className="transfer-cancel" onClick={closeTransferDialog} disabled={submitting}>Hủy</button>
+                  <button className="transfer-continue" onClick={handleTransferContinue} disabled={submitting}>Tiếp tục</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="transfer-summary">
+                  <span>Deposit ID</span><strong>#{deposit.depositId.toString()}</strong>
+                  <span>Gốc</span><strong>{formatUnits(deposit.principal, 6)} USDC</strong>
+                  <span>Người nhận</span><strong className="transfer-address">{transferReceiver.trim()}</strong>
+                </div>
+                <p className="transfer-warning">Sau khi chuyển NFT, người nhận sẽ có quyền rút tiền và gia hạn deposit này.</p>
+                <div className="transfer-modal-actions">
+                  <button className="transfer-cancel" onClick={() => setIsTransferConfirmation(false)} disabled={submitting}>Quay lại</button>
+                  <button className="transfer-confirm" onClick={handleTransferConfirm} disabled={submitting}>{submitting ? "Đang chuyển..." : "Xác nhận chuyển NFT"}</button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
 

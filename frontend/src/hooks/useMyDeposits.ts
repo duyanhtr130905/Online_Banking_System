@@ -16,9 +16,12 @@ export function useMyDeposits() {
   const { account, chainId } = useWalletContext();
   const [activeDeposits, setActiveDeposits] = useState<Deposit[]>([]);
   const [historicalDeposits, setHistoricalDeposits] = useState<Deposit[]>([]);
+  const [loadedAccount, setLoadedAccount] = useState<string | null>(null);
+  const [loadedChainId, setLoadedChainId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const mountedRef = useRef(true);
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -26,10 +29,13 @@ export function useMyDeposits() {
   }, []);
 
   const refresh = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     if (!contracts || !account || !chainId) {
-      if (mountedRef.current) {
+      if (mountedRef.current && requestId === requestIdRef.current) {
         setActiveDeposits([]);
         setHistoricalDeposits([]);
+        setLoadedAccount(null);
+        setLoadedChainId(null);
         setError(null);
       }
       return;
@@ -96,28 +102,43 @@ export function useMyDeposits() {
       );
       const nextHistory = results.filter((deposit) => deposit.status !== DepositStatus.Active);
 
-      if (mountedRef.current) {
+      if (mountedRef.current && requestId === requestIdRef.current) {
         setActiveDeposits(nextActive);
         setHistoricalDeposits(nextHistory);
+        setLoadedAccount(account);
+        setLoadedChainId(chainId);
         if (records.some((record) => record === null)) {
           setError("Không thể đọc đầy đủ dữ liệu deposit mới. Dữ liệu hiện có vẫn đang được hiển thị.");
         }
       }
     } catch {
-      if (mountedRef.current) {
+      if (mountedRef.current && requestId === requestIdRef.current) {
         setError("Không thể cập nhật dữ liệu deposit mới. Dữ liệu hiện có vẫn đang được hiển thị.");
       }
     } finally {
-      if (mountedRef.current) setLoading(false);
+      if (mountedRef.current && requestId === requestIdRef.current) setLoading(false);
     }
+  }, [account, chainId, contracts]);
+
+  useEffect(() => {
+    requestIdRef.current += 1;
+    setActiveDeposits([]);
+    setHistoricalDeposits([]);
+    setLoadedAccount(null);
+    setLoadedChainId(null);
+    setError(null);
   }, [account, chainId, contracts]);
 
   useEffect(() => { refresh(); }, [refresh]);
 
+  const isCurrentAccountData = loadedAccount === account && loadedChainId === chainId;
+  const currentActiveDeposits = isCurrentAccountData ? activeDeposits : [];
+  const currentHistoricalDeposits = isCurrentAccountData ? historicalDeposits : [];
+
   return {
-    deposits: activeDeposits,
-    activeDeposits,
-    historicalDeposits,
+    deposits: currentActiveDeposits,
+    activeDeposits: currentActiveDeposits,
+    historicalDeposits: currentHistoricalDeposits,
     loading,
     error,
     refresh,

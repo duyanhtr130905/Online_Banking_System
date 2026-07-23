@@ -3,7 +3,7 @@ import { isNetworkConfigured } from "../contracts";
 import "./ConnectButton.css";
 
 export function ConnectButton() {
-  const { account, chainId, networkName, connect, switchToSepolia, error } = useWalletContext();
+  const { account, chainId, networkName, connect, changeAccount, changingAccount, switchToSepolia, error } = useWalletContext();
 
   // Kiểm tra network có được hỗ trợ không
   const isUnsupported = chainId !== null && !isNetworkConfigured(chainId);
@@ -37,11 +37,16 @@ export function ConnectButton() {
 
   return (
     <div className="connect-wrapper">
-      <div className="connect-pill">
-        <span className="connect-dot" />
-        <span className="connect-addr">{shortAddr}</span>
-        <span className="connect-sep">·</span>
-        <span className="connect-network">{networkName}</span>
+      <div className="connect-connected-row">
+        <div className="connect-pill">
+          <span className="connect-dot" />
+          <span className="connect-addr">{shortAddr}</span>
+          <span className="connect-sep">·</span>
+          <span className="connect-network">{networkName}</span>
+        </div>
+        <button className="change-account-btn" onClick={changeAccount} disabled={changingAccount}>
+          {changingAccount ? "Đang mở MetaMask..." : "Đổi tài khoản"}
+        </button>
       </div>
       {isUnsupported && (
         <div className="connect-unsupported">

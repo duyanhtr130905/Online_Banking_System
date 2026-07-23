@@ -6,6 +6,13 @@
   gap: 8px;
 }
 
+.connect-connected-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .connect-btn {
   display: inline-flex;
   align-items: center;
@@ -107,6 +114,28 @@
   cursor: pointer;
 }
 
+.change-account-btn {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 999px;
+  background: var(--accent-light);
+  color: var(--accent);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.change-account-btn:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.16);
+}
+
+.change-account-btn:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -127,7 +156,9 @@
 }
 
 @media (max-width: 560px) {
+  .connect-connected-row { gap: 6px; }
   .connect-pill { gap: 5px; padding: 7px 10px; }
+  .change-account-btn { min-height: 34px; padding: 7px 9px; font-size: 11px; }
   .connect-network, .connect-sep { display: none; }
   .connect-unsupported { max-width: 260px; }
 }

@@ -3,9 +3,9 @@ import { parseUnits, formatUnits } from "ethers";
 import { useContracts } from "../hooks/useContracts";
 import { useWalletContext } from "../contexts/WalletContext";
 import { usePlansContext } from "../contexts/PlansContext";
+import { useAccountDataContext } from "../contexts/AccountDataContext";
 import { ADDRESSES } from "../contracts";
 import { extractError } from "../utils/errors";
-import { useAccountDataContext } from "../contexts/AccountDataContext";
 import "./OpenDepositForm.css";
 
 export function OpenDepositForm() {
@@ -13,11 +13,7 @@ export function OpenDepositForm() {
   const { account, chainId } = useWalletContext();
   const { plans } = usePlansContext();
   const { usdcBalance, balanceLoading, balanceError, refreshBalance, refreshDeposits } = useAccountDataContext();
-
-  // Chỉ hiện plan đang enabled trong dropdown
-  const enabledPlans = useMemo(() => plans.filter((p) => p.enabled), [plans]);
-
-  const [selectedPlanId, setSelectedPlanId] = useState<string>("");
+  const [selectedPlanId, setSelectedPlanId] = useState("");
   const [amount, setAmount] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -26,9 +22,9 @@ export function OpenDepositForm() {
   const [allowance, setAllowance] = useState<bigint | null>(null);
   const [allowanceError, setAllowanceError] = useState<string | null>(null);
 
-  // Plan đang chọn (để validate min/max)
+  const enabledPlans = useMemo(() => plans.filter((plan) => plan.enabled), [plans]);
   const selectedPlan = useMemo(
-    () => enabledPlans.find((p) => p.planId === Number(selectedPlanId)),
+    () => enabledPlans.find((plan) => plan.planId === Number(selectedPlanId)),
     [enabledPlans, selectedPlanId],
   );
 
@@ -40,7 +36,7 @@ export function OpenDepositForm() {
     const savingCoreAddress = ADDRESSES[chainId]?.SavingCore;
     if (!savingCoreAddress) return;
     try {
-      setAllowance(await contracts.mockUSDC.allowance(account, savingCoreAddress));
+      setAllowance(BigInt(await contracts.mockUSDC.allowance(account, savingCoreAddress)));
       setAllowanceError(null);
     } catch {
       setAllowanceError("Không thể cập nhật allowance hiện tại.");
@@ -49,7 +45,6 @@ export function OpenDepositForm() {
 
   useEffect(() => { refreshAllowance(); }, [refreshAllowance]);
 
-  // Validate lỗi input trước khi submit
   const inputError = useMemo(() => {
     if (!amount || !selectedPlan) return null;
     let amountWei: bigint;
@@ -59,53 +54,50 @@ export function OpenDepositForm() {
       return "Số tiền không hợp lệ";
     }
     if (amountWei <= 0n) return "Số tiền phải lớn hơn 0";
-
     if (selectedPlan.minDeposit > 0n && amountWei < selectedPlan.minDeposit) {
       return `Tối thiểu: ${formatUnits(selectedPlan.minDeposit, 6)} USDC`;
     }
     if (selectedPlan.maxDeposit > 0n && amountWei > selectedPlan.maxDeposit) {
       return `Tối đa: ${formatUnits(selectedPlan.maxDeposit, 6)} USDC`;
     }
+    if (usdcBalance !== null && amountWei > usdcBalance) {
+      return `Số dư không đủ. Số dư hiện tại: ${formatUnits(usdcBalance, 6)} USDC`;
+    }
     return null;
-  }, [amount, selectedPlan]);
+  }, [amount, selectedPlan, usdcBalance]);
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (!contracts || !account || !chainId || !selectedPlan || inputError) return;
-    setError(null);
-    setStatus(null);
-    setTxHash(null);
-    setSubmitting(true);
+  const canSubmit = !!selectedPlan
+    && amount.trim().length > 0
+    && usdcBalance !== null
+    && !balanceLoading
+    && !inputError
+    && !submitting;
 
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    if (!contracts || !account || !chainId || !selectedPlan || !canSubmit) return;
+    setError(null); setStatus(null); setTxHash(null); setSubmitting(true);
     try {
       const amountWei = parseUnits(amount, 6);
-      const savingCoreAddr = ADDRESSES[chainId]?.SavingCore;
-      if (!savingCoreAddr) throw new Error("Không tìm thấy địa chỉ SavingCore của mạng hiện tại.");
+      // Số dư có thể đổi sau khi UI validate, nên chặn lại trước cả approve lẫn MetaMask.
+      if (usdcBalance === null || amountWei > usdcBalance) {
+        setError(`Số dư không đủ. Số dư hiện tại: ${formatUnits(usdcBalance ?? 0n, 6)} USDC`);
+        return;
+      }
+      const savingCoreAddress = ADDRESSES[chainId]?.SavingCore;
+      if (!savingCoreAddress) throw new Error("Không tìm thấy địa chỉ SavingCore của mạng hiện tại.");
 
-      // 1. Kiểm tra allowance hiện tại
       setStatus("Đang kiểm tra allowance...");
-      const currentAllowance: bigint = await contracts.mockUSDC.allowance(
-        account,
-        savingCoreAddr,
-      );
-
-      // 2. Approve nếu chưa đủ
+      const currentAllowance = BigInt(await contracts.mockUSDC.allowance(account, savingCoreAddress));
       if (currentAllowance < amountWei) {
         setStatus("Đang chờ MetaMask xác nhận approve USDC...");
-        const approveTx = await contracts.mockUSDC.approve(
-          savingCoreAddr,
-          amountWei,
-        );
+        const approveTx = await contracts.mockUSDC.approve(savingCoreAddress, amountWei);
         setStatus("Đang chờ approve được xác nhận trên blockchain...");
         await approveTx.wait();
       }
 
-      // 3. Gọi openDeposit
       setStatus("Đang chờ MetaMask xác nhận khoản gửi...");
-      const depositTx = await contracts.savingCore.openDeposit(
-        selectedPlan.planId,
-        amountWei,
-      );
+      const depositTx = await contracts.savingCore.openDeposit(selectedPlan.planId, amountWei);
       setStatus("Đang chờ khoản gửi được xác nhận trên blockchain...");
       const receipt = await depositTx.wait();
       setTxHash(receipt.hash);
@@ -121,112 +113,46 @@ export function OpenDepositForm() {
   }
 
   if (!contracts) {
-    return (
-      <section className="deposit-section">
-        <h2 className="section-title">💰 Gửi tiết kiệm</h2>
-        <p className="deposit-empty">Đang chờ kết nối ví</p>
-      </section>
-    );
+    return <section className="deposit-section"><h2 className="section-title">💰 Gửi tiết kiệm</h2><p className="deposit-empty">Đang chờ kết nối ví</p></section>;
   }
 
   return (
     <section className="deposit-section">
       <h2 className="section-title">💰 Gửi tiết kiệm</h2>
-      <div className="deposit-balance-row">
-        <span>Số dư MockUSDC: {balanceLoading || usdcBalance === null ? "Đang tải..." : `${formatUnits(usdcBalance, 6)} USDC`}</span>
-        <button className="btn-refresh" type="button" onClick={refreshBalance} disabled={balanceLoading}>
-          Làm mới số dư
-        </button>
-      </div>
-      {balanceError && <p className="deposit-error">{balanceError}</p>}
-      <form className="deposit-form" onSubmit={handleSubmit}>
-        {/* Chọn plan */}
-        <label className="deposit-label">
-          Chọn gói tiết kiệm
-          <select
-            className="deposit-select"
-            value={selectedPlanId}
-            onChange={(e) => setSelectedPlanId(e.target.value)}
-            required
-          >
-            <option value="">-- Chọn plan --</option>
-            {enabledPlans.map((p) => (
-              <option key={p.planId} value={p.planId}>
-                Plan {p.planId} — {p.tenorDays} ngày — APR{" "}
-                {(p.aprBps / 100).toFixed(2)}%
-              </option>
-            ))}
-          </select>
-        </label>
+      <div className="deposit-layout">
+        <form className="deposit-form" onSubmit={handleSubmit}>
+          <label className="deposit-label">Chọn gói tiết kiệm
+            <select className="deposit-select" value={selectedPlanId} onChange={(event) => setSelectedPlanId(event.target.value)} required>
+              <option value="">-- Chọn plan --</option>
+              {enabledPlans.map((plan) => <option key={plan.planId} value={plan.planId}>Plan {plan.planId} — {plan.tenorDays} ngày — APR {(plan.aprBps / 100).toFixed(2)}%</option>)}
+            </select>
+          </label>
+          <label className="deposit-label">Số tiền (USDC)
+            <input className={`deposit-input ${inputError ? "input-error" : ""}`} type="text" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="VD: 1000" required />
+            {inputError && <span className="field-error">{inputError}</span>}
+          </label>
+          <button className="btn-deposit" type="submit" disabled={!canSubmit}>
+            {submitting ? (status ?? "Đang xử lý...") : "Gửi tiền"}
+          </button>
+        </form>
 
-        {/* Thông tin plan đã chọn */}
-        {selectedPlan && (
-          <div className="plan-info">
-            <span>
-              Min:{" "}
-              {selectedPlan.minDeposit > 0n
-                ? `${formatUnits(selectedPlan.minDeposit, 6)} USDC`
-                : "Không có mức tối thiểu"}
-            </span>
-            <span>·</span>
-            <span>
-              Max:{" "}
-              {selectedPlan.maxDeposit > 0n
-                ? `${formatUnits(selectedPlan.maxDeposit, 6)} USDC`
-                : "Không giới hạn"}
-            </span>
+        <aside className="deposit-sidebar">
+          <div className="deposit-balance-row">
+            <span>Số dư MockUSDC</span>
+            <strong>{balanceLoading || usdcBalance === null ? "Đang tải..." : `${formatUnits(usdcBalance, 6)} USDC`}</strong>
+            <button className="btn-refresh" type="button" onClick={refreshBalance} disabled={balanceLoading}>Làm mới số dư</button>
           </div>
-        )}
-
-        {allowance !== null && (
-          <p className="deposit-allowance">Allowance cho SavingCore: {formatUnits(allowance, 6)} USDC</p>
-        )}
-        {allowanceError && <p className="field-error">{allowanceError}</p>}
-
-        {/* Input số tiền */}
-        <label className="deposit-label">
-          Số tiền (USDC)
-          <input
-            className={`deposit-input ${inputError ? "input-error" : ""}`}
-            type="text"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="VD: 1000"
-            required
-          />
-          {inputError && <span className="field-error">{inputError}</span>}
-        </label>
-
-        <button
-          className="btn-deposit"
-          type="submit"
-          disabled={submitting || !!inputError || !selectedPlan}
-        >
-          {submitting ? (status ?? "Đang xử lý...") : "Gửi tiền"}
-        </button>
-      </form>
-
-      {/* Status / Success */}
-      {status && !error && (
-        <div className="deposit-status">
-          <p>{status}</p>
-          {txHash && chainId === 11155111 && (
-            <a
-              className="tx-link"
-              href={`https://sepolia.etherscan.io/tx/${txHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Xem trên Etherscan ↗
-            </a>
-          )}
-          {txHash && chainId !== 11155111 && (
-            <p className="tx-hash">TX: {txHash}</p>
-          )}
-        </div>
-      )}
-
-      {/* Error */}
+          {balanceError && <p className="deposit-error">{balanceError}</p>}
+          {selectedPlan && <div className="plan-info">
+            <strong>Thông tin plan đã chọn</strong>
+            <span>Min: {selectedPlan.minDeposit > 0n ? `${formatUnits(selectedPlan.minDeposit, 6)} USDC` : "Không có mức tối thiểu"}</span>
+            <span>Max: {selectedPlan.maxDeposit > 0n ? `${formatUnits(selectedPlan.maxDeposit, 6)} USDC` : "Không giới hạn"}</span>
+          </div>}
+          {allowance !== null && <p className="deposit-allowance">Allowance cho SavingCore: {formatUnits(allowance, 6)} USDC</p>}
+          {allowanceError && <p className="field-error">{allowanceError}</p>}
+        </aside>
+      </div>
+      {status && !error && <div className="deposit-status"><p>{status}</p>{txHash && chainId === 11155111 && <a className="tx-link" href={`https://sepolia.etherscan.io/tx/${txHash}`} target="_blank" rel="noopener noreferrer">Xem trên Etherscan ↗</a>}{txHash && chainId !== 11155111 && <p className="tx-hash">TX: {txHash}</p>}</div>}
       {error && <p className="deposit-error">{error}</p>}
     </section>
   );
