@@ -5,6 +5,7 @@ import { useWalletContext } from "./WalletContext";
 import type { Deposit } from "../types";
 
 interface AccountDataContextValue {
+  chainTimestamp: number | null;
   usdcBalance: bigint | null;
   balanceLoading: boolean;
   balanceError: string | null;
@@ -20,8 +21,9 @@ const AccountDataContext = createContext<AccountDataContextValue | null>(null);
 
 export function AccountDataProvider({ children }: { children: ReactNode }) {
   const contracts = useContracts();
-  const { account } = useWalletContext();
+  const { account, provider } = useWalletContext();
   const deposits = useMyDeposits();
+  const [chainTimestamp, setChainTimestamp] = useState<number | null>(null);
   const [usdcBalance, setUsdcBalance] = useState<bigint | null>(null);
   const [balanceAccount, setBalanceAccount] = useState<string | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
@@ -33,6 +35,39 @@ export function AccountDataProvider({ children }: { children: ReactNode }) {
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
+
+  useEffect(() => {
+    if (!provider) {
+      setChainTimestamp(null);
+      return;
+    }
+
+    let cancelled = false;
+    let requestId = 0;
+    const refreshChainTimestamp = async () => {
+      const currentRequestId = ++requestId;
+      try {
+        const block = await provider.getBlock("latest");
+        if (!cancelled && currentRequestId === requestId && block) {
+          setChainTimestamp(block.timestamp);
+        }
+      } catch {
+        // Giữ timestamp on-chain gần nhất; không dùng Date.now() vì Hardhat có thể tăng thời gian riêng.
+      }
+    };
+    const handleBlock = () => { void refreshChainTimestamp(); };
+
+    void refreshChainTimestamp();
+    provider.on("block", handleBlock);
+    // MetaMask không phát event khi block được mine từ terminal khác; poll giúp UI bắt evm_mine không cần reload.
+    const timer = window.setInterval(() => { void refreshChainTimestamp(); }, 1_000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      provider.off("block", handleBlock);
+    };
+  }, [provider]);
 
   const refreshBalance = useCallback(async () => {
     const requestId = ++requestIdRef.current;
@@ -72,6 +107,7 @@ export function AccountDataProvider({ children }: { children: ReactNode }) {
 
   return (
     <AccountDataContext.Provider value={{
+      chainTimestamp,
       usdcBalance: balanceAccount === account ? usdcBalance : null,
       balanceLoading,
       balanceError,

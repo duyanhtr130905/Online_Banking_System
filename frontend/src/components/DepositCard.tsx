@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { formatUnits, isAddress, ZeroAddress } from "ethers";
 import { useContracts } from "../hooks/useContracts";
 import { useWalletContext } from "../contexts/WalletContext";
 import { usePlansContext } from "../contexts/PlansContext";
+import { useAccountDataContext } from "../contexts/AccountDataContext";
 import { extractError } from "../utils/errors";
 import { DepositStatus } from "../types";
 import type { Deposit, Plan } from "../types";
@@ -24,10 +25,10 @@ const statusLabels: Record<DepositStatus, string> = {
 
 export function DepositCard({ deposit, plan, onActionSuccess, onTransferSuccess }: DepositCardProps) {
   const contracts = useContracts();
-  const { account, provider } = useWalletContext();
+  const { account } = useWalletContext();
+  const { chainTimestamp } = useAccountDataContext();
   const { plans } = usePlansContext();
   const enabledPlans = useMemo(() => plans.filter((item) => item.enabled), [plans]);
-  const [now, setNow] = useState(0);
   const [gracePeriodSeconds, setGracePeriodSeconds] = useState<bigint | null>(null);
   const [interest, setInterest] = useState<bigint | null>(null);
   const [penalty, setPenalty] = useState<bigint | null>(null);
@@ -46,9 +47,8 @@ export function DepositCard({ deposit, plan, onActionSuccess, onTransferSuccess 
   const [transferReceiver, setTransferReceiver] = useState("");
   const [transferReceiverError, setTransferReceiverError] = useState<string | null>(null);
   const [isTransferConfirmation, setIsTransferConfirmation] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
   const isActive = deposit.status === DepositStatus.Active && deposit.isCurrentOwner;
+  const now = chainTimestamp ?? 0;
   const maturityAt = Number(deposit.maturityAt);
   const tenorSeconds = plan ? plan.tenorDays * 86_400 : 0;
   const openedAt = tenorSeconds > 0 ? maturityAt - tenorSeconds : maturityAt;
@@ -71,25 +71,6 @@ export function DepositCard({ deposit, plan, onActionSuccess, onTransferSuccess 
       setRenewPlanId(deposit.planId.toString());
     }
   }, [enabledPlans]);
-
-  useEffect(() => {
-    if (!provider) return;
-    let cancelled = false;
-    const fetchTime = async () => {
-      try {
-        const block = await provider.getBlock("latest");
-        if (!cancelled && block) setNow(block.timestamp);
-      } catch {
-        // Không thay thế thời gian on-chain bằng thời gian máy khi RPC tạm lỗi.
-      }
-    };
-    fetchTime();
-    intervalRef.current = setInterval(fetchTime, 15_000);
-    return () => {
-      cancelled = true;
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [provider]);
 
   useEffect(() => {
     if (!contracts) return;

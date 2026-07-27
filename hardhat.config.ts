@@ -14,6 +14,10 @@ const etherscanApiKey = process.env.ETHERSCAN_API_KEY || "";
 
 module.exports = {
   networks: {
+    localhost: {
+      url: "http://127.0.0.1:8545",
+      chainId: 31337,
+    },
     sepolia: {
       url: "https://ethereum-sepolia-rpc.publicnode.com",
       chainId: 11155111,

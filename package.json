@@ -8,7 +8,9 @@
     "hardhat": "hardhat",
     "node": "hardhat node",
     "mint:demo:sepolia": "hardhat run scripts/mint-demo.ts --network sepolia",
-    "bot:autorenew": "hardhat run scripts/autoRenewBot.ts",
+    "bot:autorenew": "npm run bot:autorenew:local",
+    "bot:autorenew:local": "hardhat run scripts/autoRenewBot.ts --network localhost",
+    "bot:autorenew:sepolia": "hardhat run scripts/autoRenewBot.ts --network sepolia",
     "size": "hardhat size-contracts",
     "clean": "hardhat clean"
   },

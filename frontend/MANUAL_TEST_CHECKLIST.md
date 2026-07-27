@@ -17,6 +17,7 @@
 - [ ] Rút đúng hạn.
 - [ ] Manual renew sang plan enabled.
 - [ ] Sau grace period, gọi **Kích hoạt auto-renew** thủ công.
+- [ ] Khi chạy local, tạo block qua `evm_increaseTime` + `evm_mine`: thẻ tự đổi sang **Đã đáo hạn** trong tối đa 1 giây, không reload trang.
 - [ ] Kiểm tra hai tab **Đang hoạt động** và **Lịch sử**, bao gồm liên kết Renewed cũ → mới khi event có dữ liệu.
 
 ## C. Admin
