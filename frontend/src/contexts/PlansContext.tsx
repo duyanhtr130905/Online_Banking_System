@@ -4,6 +4,7 @@ import { useContracts } from "../hooks/useContracts";
 import { useWalletContext } from "./WalletContext";
 import { DEPLOY_BLOCK } from "../contracts";
 import type { Plan } from "../types";
+import { queryLogsInChunks } from "../utils/queryLogsInChunks";
 
 interface PlansContextValue {
   plans: Plan[];
@@ -51,9 +52,12 @@ export function PlansProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     setError(null);
     try {
-      const planCreatedEvents = await contracts.savingCore.queryFilter(
+      const currentBlock = await contracts.savingCore.runner!.provider!.getBlockNumber();
+      const planCreatedEvents = await queryLogsInChunks(
+        contracts.savingCore,
         contracts.savingCore.filters.PlanCreated(),
         DEPLOY_BLOCK[chainId] ?? 0,
+        currentBlock,
       );
       const planIds = new Set<number>();
       for (const event of planCreatedEvents) {

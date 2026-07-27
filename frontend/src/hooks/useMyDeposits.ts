@@ -5,6 +5,7 @@ import { useWalletContext } from "../contexts/WalletContext";
 import { DEPLOY_BLOCK } from "../contracts";
 import { DepositStatus } from "../types";
 import type { Deposit } from "../types";
+import { queryLogsInChunks } from "../utils/queryLogsInChunks";
 
 /**
  * SavingCore không có ERC721Enumerable, nên event Transfer là nguồn danh sách token
@@ -45,10 +46,13 @@ export function useMyDeposits() {
     setError(null);
     try {
       const fromBlock = DEPLOY_BLOCK[chainId] ?? 0;
+      const currentBlock = await contracts.savingCore.runner!.provider!.getBlockNumber();
       const candidateIds = new Set<bigint>();
-      const transferEvents = await contracts.savingCore.queryFilter(
+      const transferEvents = await queryLogsInChunks(
+        contracts.savingCore,
         contracts.savingCore.filters.Transfer(null, account),
         fromBlock,
+        currentBlock,
       );
       for (const ev of transferEvents) {
         if (ev instanceof EventLog) candidateIds.add(BigInt(ev.args.tokenId));
@@ -56,9 +60,11 @@ export function useMyDeposits() {
 
       // Liên kết chỉ được hiển thị khi chính event Renewed xác nhận ID mới.
       const renewedTo = new Map<bigint, bigint>();
-      const renewEvents = await contracts.savingCore.queryFilter(
+      const renewEvents = await queryLogsInChunks(
+        contracts.savingCore,
         contracts.savingCore.filters.Renewed(),
         fromBlock,
+        currentBlock,
       );
       for (const ev of renewEvents) {
         if (ev instanceof EventLog) {
