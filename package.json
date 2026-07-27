@@ -8,6 +8,7 @@
     "hardhat": "hardhat",
     "node": "hardhat node",
     "mint:demo:sepolia": "hardhat run scripts/mint-demo.ts --network sepolia",
+    "bot:autorenew": "hardhat run scripts/autoRenewBot.ts",
     "size": "hardhat size-contracts",
     "clean": "hardhat clean"
   },

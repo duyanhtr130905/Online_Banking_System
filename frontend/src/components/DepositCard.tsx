@@ -26,6 +26,7 @@ export function DepositCard({ deposit, plan, onActionSuccess, onTransferSuccess 
   const contracts = useContracts();
   const { account, provider } = useWalletContext();
   const { plans } = usePlansContext();
+  const enabledPlans = useMemo(() => plans.filter((item) => item.enabled), [plans]);
   const [now, setNow] = useState(0);
   const [gracePeriodSeconds, setGracePeriodSeconds] = useState<bigint | null>(null);
   const [interest, setInterest] = useState<bigint | null>(null);
@@ -35,14 +36,18 @@ export function DepositCard({ deposit, plan, onActionSuccess, onTransferSuccess 
   const [actionStatus, setActionStatus] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [renewPlanId, setRenewPlanId] = useState("");
+  const [renewPlanId, setRenewPlanId] = useState(() => {
+    const currentPlanStillEnabled = enabledPlans.some(
+      (item) => item.planId === Number(deposit.planId),
+    );
+    return currentPlanStillEnabled ? deposit.planId.toString() : "";
+  });
   const [isTransferOpen, setIsTransferOpen] = useState(false);
   const [transferReceiver, setTransferReceiver] = useState("");
   const [transferReceiverError, setTransferReceiverError] = useState<string | null>(null);
   const [isTransferConfirmation, setIsTransferConfirmation] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const enabledPlans = useMemo(() => plans.filter((item) => item.enabled), [plans]);
   const isActive = deposit.status === DepositStatus.Active && deposit.isCurrentOwner;
   const maturityAt = Number(deposit.maturityAt);
   const tenorSeconds = plan ? plan.tenorDays * 86_400 : 0;
@@ -60,6 +65,12 @@ export function DepositCard({ deposit, plan, onActionSuccess, onTransferSuccess 
   const gracePercent = isInGracePeriod && graceDuration && graceDuration > 0
     ? Math.min(100, ((now - maturityAt) / graceDuration) * 100)
     : 0;
+
+  useEffect(() => {
+    if (renewPlanId === "" && enabledPlans.some((item) => item.planId === Number(deposit.planId))) {
+      setRenewPlanId(deposit.planId.toString());
+    }
+  }, [enabledPlans]);
 
   useEffect(() => {
     if (!provider) return;

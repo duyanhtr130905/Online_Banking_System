@@ -11,9 +11,9 @@ export const ADDRESSES: Record<number, NetworkAddresses> = {
     SavingCore: "0xB1becB075dE06FAed11319390B4bBEc24C296dF8",
   },
   31337: {
-    MockUSDC: "",
-    VaultManager: "",
-    SavingCore: "",
+    MockUSDC: "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+    VaultManager: "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+    SavingCore: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
   },
 };
 

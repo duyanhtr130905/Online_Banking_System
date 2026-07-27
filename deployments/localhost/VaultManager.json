@@ -1,0 +1,750 @@
+{
+  "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_token",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "AccessControlBadConfirmation",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "neededRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "AccessControlUnauthorizedAccount",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "EnforcedPause",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ExpectedPause",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "SafeERC20FailedOperation",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "core",
+          "type": "address"
+        }
+      ],
+      "name": "CoreAddressSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "InterestPaid",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Paused",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "previousAdminRole",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "newAdminRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleAdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleRevoked",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Unpaused",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "VaultFunded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "VaultWithdrawn",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "ADMIN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_ADMIN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "coreAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "fundVault",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getAvailableBalance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getRoleAdmin",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "grantRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "hasRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pause",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "paused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "payInterest",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "callerConfirmation",
+          "type": "address"
+        }
+      ],
+      "name": "renounceRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "revokeRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "core",
+          "type": "address"
+        }
+      ],
+      "name": "setCoreAddress",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "token",
+      "outputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "unpause",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdrawVault",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xd6f5fa94db47bfd20433ddc205deb731665bf081ef09c0561ec3bdf2a3804307",
+  "receipt": {
+    "to": null,
+    "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "contractAddress": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+    "transactionIndex": 0,
+    "gasUsed": "865735",
+    "logsBloom": "0x00000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000020000000000000000000000000000000020000000000000100000800000000000000000800000000000000040000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000004000000200000000000000000000000002000000100000000000020000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x54b6c8086ef11353055c1e32ecb7d43ee67ef666f031a4b5366ec702b1bc8237",
+    "transactionHash": "0xd6f5fa94db47bfd20433ddc205deb731665bf081ef09c0561ec3bdf2a3804307",
+    "logs": [
+      {
+        "transactionIndex": 0,
+        "blockNumber": 7,
+        "transactionHash": "0xd6f5fa94db47bfd20433ddc205deb731665bf081ef09c0561ec3bdf2a3804307",
+        "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+        "topics": [
+          "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        "data": "0x",
+        "logIndex": 0,
+        "blockHash": "0x54b6c8086ef11353055c1e32ecb7d43ee67ef666f031a4b5366ec702b1bc8237"
+      },
+      {
+        "transactionIndex": 0,
+        "blockNumber": 7,
+        "transactionHash": "0xd6f5fa94db47bfd20433ddc205deb731665bf081ef09c0561ec3bdf2a3804307",
+        "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+        "topics": [
+          "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d",
+          "0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775",
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+          "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        ],
+        "data": "0x",
+        "logIndex": 1,
+        "blockHash": "0x54b6c8086ef11353055c1e32ecb7d43ee67ef666f031a4b5366ec702b1bc8237"
+      }
+    ],
+    "blockNumber": 7,
+    "cumulativeGasUsed": "865735",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "5922707579c9a683ff5a7dadcd77b4e9",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.28+commit.7893614a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AccessControlBadConfirmation\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"neededRole\",\"type\":\"bytes32\"}],\"name\":\"AccessControlUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EnforcedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpectedPause\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"SafeERC20FailedOperation\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"core\",\"type\":\"address\"}],\"name\":\"CoreAddressSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"InterestPaid\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"VaultFunded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"VaultWithdrawn\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"coreAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"fundVault\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAvailableBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"payInterest\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"callerConfirmation\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"core\",\"type\":\"address\"}],\"name\":\"setCoreAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"token\",\"outputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdrawVault\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"\\u0110\\u00e2y ch\\u00ednh l\\u00e0 ki\\u1ebfn tr\\u00fac hi\\u1ec7n th\\u1ef1c h\\u00f3a Business Rule #5 (M\\u1ee5c 6 \\u0111\\u1ec1 b\\u00e0i):      \\\"L\\u00e3i lu\\u00f4n \\u0111\\u01b0\\u1ee3c tr\\u1ea3 t\\u1eeb vault, t\\u00e1ch bi\\u1ec7t kh\\u1ecfi principal\\\".      VaultManager KH\\u00d4NG h\\u1ec1 bi\\u1ebft g\\u00ec v\\u1ec1 Plan, Deposit, APR - n\\u00f3 ch\\u1ec9 bi\\u1ebft gi\\u1eef ti\\u1ec1n v\\u00e0      chuy\\u1ec3n ti\\u1ec1n theo l\\u1ec7nh c\\u1ee7a SavingCore.\",\"errors\":{\"AccessControlBadConfirmation()\":[{\"details\":\"The caller of a function is not the expected one. NOTE: Don't confuse with {AccessControlUnauthorizedAccount}.\"}],\"AccessControlUnauthorizedAccount(address,bytes32)\":[{\"details\":\"The `account` is missing a role.\"}],\"EnforcedPause()\":[{\"details\":\"The operation failed because the contract is paused.\"}],\"ExpectedPause()\":[{\"details\":\"The operation failed because the contract is not paused.\"}],\"SafeERC20FailedOperation(address)\":[{\"details\":\"An operation with an ERC-20 token failed.\"}]},\"events\":{\"Paused(address)\":{\"details\":\"Emitted when the pause is triggered by `account`.\"},\"RoleAdminChanged(bytes32,bytes32,bytes32)\":{\"details\":\"Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole` `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite {RoleAdminChanged} not being emitted to signal this.\"},\"RoleGranted(bytes32,address,address)\":{\"details\":\"Emitted when `account` is granted `role`. `sender` is the account that originated the contract call. This account bears the admin role (for the granted role). Expected in cases where the role was granted using the internal {AccessControl-_grantRole}.\"},\"RoleRevoked(bytes32,address,address)\":{\"details\":\"Emitted when `account` is revoked `role`. `sender` is the account that originated the contract call:   - if using `revokeRole`, it is the admin role bearer   - if using `renounceRole`, it is the role bearer (i.e. `account`)\"},\"Unpaused(address)\":{\"details\":\"Emitted when the pause is lifted by `account`.\"}},\"kind\":\"dev\",\"methods\":{\"constructor\":{\"params\":{\"_token\":\"\\u0110\\u1ecba ch\\u1ec9 MockUSDC (ho\\u1eb7c USDC th\\u1eadt sau n\\u00e0y)\"}},\"fundVault(uint256)\":{\"details\":\"CH\\u1ec8 ADMIN g\\u1ecdi \\u0111\\u01b0\\u1ee3c (kh\\u00f4ng m\\u1edf public) - \\u0111\\u1ed1i x\\u1ee9ng v\\u1edbi withdrawVault(), v\\u00e0 kh\\u1edbp v\\u1edbi      M\\u1ee5c 4 \\u0111\\u1ec1 b\\u00e0i li\\u1ec7t k\\u00ea fundVault n\\u1eb1m trong nh\\u00f3m \\\"Admin Functions\\\".      Admin ph\\u1ea3i approve() cho VaultManager tr\\u01b0\\u1edbc khi g\\u1ecdi h\\u00e0m n\\u00e0y (chu\\u1ea9n ERC20).\"},\"getAvailableBalance()\":{\"details\":\"\\\"view\\\" = ch\\u1ec9 \\u0111\\u1ecdc d\\u1eef li\\u1ec7u, kh\\u00f4ng t\\u1ed1n gas th\\u1eadt khi g\\u1ecdi t\\u1eeb b\\u00ean ngo\\u00e0i (off-chain).\"},\"getRoleAdmin(bytes32)\":{\"details\":\"Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.\"},\"grantRole(bytes32,address)\":{\"details\":\"Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event.\"},\"hasRole(bytes32,address)\":{\"details\":\"Returns `true` if `account` has been granted `role`.\"},\"paused()\":{\"details\":\"Returns true if the contract is paused, and false otherwise.\"},\"payInterest(address,uint256)\":{\"details\":\"onlyCore + whenNotPaused: ch\\u1ec9 SavingCore g\\u1ecdi \\u0111\\u01b0\\u1ee3c, v\\u00e0 b\\u1ecb ch\\u1eb7n khi h\\u1ec7 th\\u1ed1ng pause      (kh\\u1edbp Business Rule #6 - pause ch\\u1eb7n withdraw/renew, m\\u00e0 withdraw/renew \\u0111\\u1ec1u c\\u1ea7n g\\u1ecdi      h\\u00e0m n\\u00e0y \\u0111\\u1ec3 l\\u1ea5y l\\u00e3i).      Business Rule #5 (M\\u1ee5c 6): n\\u1ebfu vault kh\\u00f4ng \\u0111\\u1ee7 ti\\u1ec1n, giao d\\u1ecbch PH\\u1ea2I revert (th\\u1ea5t b\\u1ea1i)      - d\\u00f2ng require() b\\u00ean d\\u01b0\\u1edbi ch\\u00ednh l\\u00e0 ch\\u1ed7 hi\\u1ec7n th\\u1ef1c h\\u00f3a quy t\\u1eafc n\\u00e0y.\",\"params\":{\"amount\":\"S\\u1ed1 ti\\u1ec1n l\\u00e3i c\\u1ea7n tr\\u1ea3\",\"to\":\"\\u0110\\u1ecba ch\\u1ec9 user nh\\u1eadn l\\u00e3i\"}},\"renounceRole(bytes32,address)\":{\"details\":\"Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `callerConfirmation`. May emit a {RoleRevoked} event.\"},\"revokeRole(bytes32,address)\":{\"details\":\"Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleRevoked} event.\"},\"setCoreAddress(address)\":{\"details\":\"\\u0110\\u00e2y l\\u00e0 b\\u01b0\\u1edbc \\\"n\\u1ed1i d\\u00e2y\\\" gi\\u1eefa 2 contract, l\\u00e0m th\\u1ee7 c\\u00f4ng sau khi deploy (kh\\u00f4ng th\\u1ec3 t\\u1ef1 \\u0111\\u1ed9ng      v\\u00ec l\\u00fac deploy VaultManager, SavingCore ch\\u01b0a t\\u1ed3n t\\u1ea1i - v\\u00e0 ng\\u01b0\\u1ee3c l\\u1ea1i n\\u1ebfu deploy      SavingCore tr\\u01b0\\u1edbc th\\u00ec c\\u0169ng ch\\u01b0a c\\u00f3 \\u0111\\u1ecba ch\\u1ec9 VaultManager).\"},\"supportsInterface(bytes4)\":{\"details\":\"Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[ERC section] to learn more about how these ids are created. This function call must use less than 30 000 gas.\"},\"withdrawVault(uint256)\":{\"details\":\"\\u0110\\u00e2y l\\u00e0 h\\u00e0m NH\\u1ea0Y C\\u1ea2M NH\\u1ea4T trong contract - ch\\u1ec9 admin, v\\u00e0 v\\u1ec1 sau (Creative Challenge C2)      n\\u00ean th\\u00eam \\\"solvency guard\\\" \\u0111\\u1ec3 ch\\u1eb7n admin r\\u00fat v\\u01b0\\u1ee3t qu\\u00e1 s\\u1ed1 ti\\u1ec1n \\u0111\\u00e3 cam k\\u1ebft tr\\u1ea3 cho      c\\u00e1c deposit \\u0111ang active. \\u1ede Ng\\u00e0y 3 n\\u00e0y CH\\u01afA l\\u00e0m C2, ch\\u1ec9 c\\u00f3 b\\u1ea3n c\\u01a1 b\\u1ea3n.\"}},\"title\":\"VaultManager\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"fundVault(uint256)\":{\"notice\":\"Admin n\\u1ea1p th\\u00eam ti\\u1ec1n v\\u00e0o vault \\u0111\\u1ec3 \\u0111\\u1ea3m b\\u1ea3o \\u0111\\u1ee7 thanh kho\\u1ea3n tr\\u1ea3 l\\u00e3i cho user.\"},\"getAvailableBalance()\":{\"notice\":\"Xem vault hi\\u1ec7n \\u0111ang gi\\u1eef bao nhi\\u00eau ti\\u1ec1n - d\\u00f9ng \\u0111\\u1ec3 ki\\u1ec3m tra tr\\u01b0\\u1edbc khi r\\u00fat/tr\\u1ea3 l\\u00e3i,         ho\\u1eb7c \\u0111\\u1ec3 frontend hi\\u1ec3n th\\u1ecb t\\u00ecnh tr\\u1ea1ng thanh kho\\u1ea3n.\"},\"payInterest(address,uint256)\":{\"notice\":\"Tr\\u1ea3 l\\u00e3i cho user - \\u0110\\u00c2Y L\\u00c0 H\\u00c0M DUY NH\\u1ea4T khi\\u1ebfn ti\\u1ec1n r\\u1eddi kh\\u1ecfi vault \\u0111\\u1ec3 tr\\u1ea3 l\\u00e3i.\"},\"setCoreAddress(address)\":{\"notice\":\"G\\u1eafn \\u0111\\u1ecba ch\\u1ec9 contract SavingCore v\\u00e0o vault - ch\\u1ec9 g\\u1ecdi 1 l\\u1ea7n sau khi deploy c\\u1ea3 2 contract.\"},\"withdrawVault(uint256)\":{\"notice\":\"Admin r\\u00fat b\\u1edbt ti\\u1ec1n kh\\u1ecfi vault (v\\u00ed d\\u1ee5 khi vault d\\u01b0 th\\u1eeba qu\\u00e1 nhi\\u1ec1u).\"}},\"notice\":\"\\\"Kho b\\u1ea1c\\\" c\\u1ee7a h\\u1ec7 th\\u1ed1ng - CH\\u1ec8 gi\\u1eef ti\\u1ec1n d\\u00f9ng \\u0111\\u1ec3 tr\\u1ea3 L\\u00c3I cho user.         KH\\u00d4NG gi\\u1eef ti\\u1ec1n g\\u1ed1c (principal) - ti\\u1ec1n g\\u1ed1c n\\u1eb1m trong SavingCore.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/VaultManager.sol\":\"VaultManager\"},\"evmVersion\":\"cancun\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":1000},\"remappings\":[],\"viaIR\":true},\"sources\":{\"@openzeppelin/contracts/access/AccessControl.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.6.0) (access/AccessControl.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IAccessControl} from \\\"./IAccessControl.sol\\\";\\nimport {Context} from \\\"../utils/Context.sol\\\";\\nimport {ERC165} from \\\"../utils/introspection/ERC165.sol\\\";\\n\\n/**\\n * @dev Contract module that allows children to implement role-based access\\n * control mechanisms. This is a lightweight version that doesn't allow enumerating role\\n * members except through off-chain means by accessing the contract event logs. Some\\n * applications may benefit from on-chain enumerability, for those cases see\\n * {AccessControlEnumerable}.\\n *\\n * Roles are referred to by their `bytes32` identifier. These should be exposed\\n * in the external API and be unique. The best way to achieve this is by\\n * using `public constant` hash digests:\\n *\\n * ```solidity\\n * bytes32 public constant MY_ROLE = keccak256(\\\"MY_ROLE\\\");\\n * ```\\n *\\n * Roles can be used to represent a set of permissions. To restrict access to a\\n * function call, use {hasRole}:\\n *\\n * ```solidity\\n * function foo() public {\\n *     require(hasRole(MY_ROLE, msg.sender));\\n *     ...\\n * }\\n * ```\\n *\\n * Roles can be granted and revoked dynamically via the {grantRole} and\\n * {revokeRole} functions. Each role has an associated admin role, and only\\n * accounts that have a role's admin role can call {grantRole} and {revokeRole}.\\n *\\n * By default, the admin role for all roles is `DEFAULT_ADMIN_ROLE`, which means\\n * that only accounts with this role will be able to grant or revoke other\\n * roles. More complex role relationships can be created by using\\n * {_setRoleAdmin}.\\n *\\n * WARNING: The `DEFAULT_ADMIN_ROLE` is also its own admin: it has permission to\\n * grant and revoke this role. Extra precautions should be taken to secure\\n * accounts that have been granted it. We recommend using {AccessControlDefaultAdminRules}\\n * to enforce additional security measures for this role.\\n */\\nabstract contract AccessControl is Context, IAccessControl, ERC165 {\\n    struct RoleData {\\n        mapping(address account => bool) hasRole;\\n        bytes32 adminRole;\\n    }\\n\\n    mapping(bytes32 role => RoleData) private _roles;\\n\\n    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;\\n\\n    /**\\n     * @dev Modifier that checks that an account has a specific role. Reverts\\n     * with an {AccessControlUnauthorizedAccount} error including the required role.\\n     */\\n    modifier onlyRole(bytes32 role) {\\n        _checkRole(role);\\n        _;\\n    }\\n\\n    /// @inheritdoc ERC165\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IAccessControl).interfaceId || super.supportsInterface(interfaceId);\\n    }\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) public view virtual returns (bool) {\\n        return _roles[role].hasRole[account];\\n    }\\n\\n    /**\\n     * @dev Reverts with an {AccessControlUnauthorizedAccount} error if `_msgSender()`\\n     * is missing `role`. Overriding this function changes the behavior of the {onlyRole} modifier.\\n     */\\n    function _checkRole(bytes32 role) internal view virtual {\\n        _checkRole(role, _msgSender());\\n    }\\n\\n    /**\\n     * @dev Reverts with an {AccessControlUnauthorizedAccount} error if `account`\\n     * is missing `role`.\\n     */\\n    function _checkRole(bytes32 role, address account) internal view virtual {\\n        if (!hasRole(role, account)) {\\n            revert AccessControlUnauthorizedAccount(account, role);\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) public view virtual returns (bytes32) {\\n        return _roles[role].adminRole;\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     *\\n     * May emit a {RoleGranted} event.\\n     */\\n    function grantRole(bytes32 role, address account) public virtual onlyRole(getRoleAdmin(role)) {\\n        _grantRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function revokeRole(bytes32 role, address account) public virtual onlyRole(getRoleAdmin(role)) {\\n        _revokeRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been revoked `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `callerConfirmation`.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function renounceRole(bytes32 role, address callerConfirmation) public virtual {\\n        if (callerConfirmation != _msgSender()) {\\n            revert AccessControlBadConfirmation();\\n        }\\n\\n        _revokeRole(role, callerConfirmation);\\n    }\\n\\n    /**\\n     * @dev Sets `adminRole` as ``role``'s admin role.\\n     *\\n     * Emits a {RoleAdminChanged} event.\\n     */\\n    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual {\\n        bytes32 previousAdminRole = getRoleAdmin(role);\\n        _roles[role].adminRole = adminRole;\\n        emit RoleAdminChanged(role, previousAdminRole, adminRole);\\n    }\\n\\n    /**\\n     * @dev Attempts to grant `role` to `account` and returns a boolean indicating if `role` was granted.\\n     *\\n     * Internal function without access restriction.\\n     *\\n     * May emit a {RoleGranted} event.\\n     */\\n    function _grantRole(bytes32 role, address account) internal virtual returns (bool) {\\n        if (!hasRole(role, account)) {\\n            _roles[role].hasRole[account] = true;\\n            emit RoleGranted(role, account, _msgSender());\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Attempts to revoke `role` from `account` and returns a boolean indicating if `role` was revoked.\\n     *\\n     * Internal function without access restriction.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function _revokeRole(bytes32 role, address account) internal virtual returns (bool) {\\n        if (hasRole(role, account)) {\\n            _roles[role].hasRole[account] = false;\\n            emit RoleRevoked(role, account, _msgSender());\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x4686ec784d75f95beaf2bf5b5f26e5f946d4c864aaee9c3c62bdc18381f5e017\",\"license\":\"MIT\"},\"@openzeppelin/contracts/access/IAccessControl.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.4.0) (access/IAccessControl.sol)\\n\\npragma solidity >=0.8.4;\\n\\n/**\\n * @dev External interface of AccessControl declared to support ERC-165 detection.\\n */\\ninterface IAccessControl {\\n    /**\\n     * @dev The `account` is missing a role.\\n     */\\n    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);\\n\\n    /**\\n     * @dev The caller of a function is not the expected one.\\n     *\\n     * NOTE: Don't confuse with {AccessControlUnauthorizedAccount}.\\n     */\\n    error AccessControlBadConfirmation();\\n\\n    /**\\n     * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`\\n     *\\n     * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite\\n     * {RoleAdminChanged} not being emitted to signal this.\\n     */\\n    event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);\\n\\n    /**\\n     * @dev Emitted when `account` is granted `role`.\\n     *\\n     * `sender` is the account that originated the contract call. This account bears the admin role (for the granted role).\\n     * Expected in cases where the role was granted using the internal {AccessControl-_grantRole}.\\n     */\\n    event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Emitted when `account` is revoked `role`.\\n     *\\n     * `sender` is the account that originated the contract call:\\n     *   - if using `revokeRole`, it is the admin role bearer\\n     *   - if using `renounceRole`, it is the role bearer (i.e. `account`)\\n     */\\n    event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) external view returns (bool);\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {AccessControl-_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) external view returns (bytes32);\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function grantRole(bytes32 role, address account) external;\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function revokeRole(bytes32 role, address account) external;\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been granted `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `callerConfirmation`.\\n     */\\n    function renounceRole(bytes32 role, address callerConfirmation) external;\\n}\\n\",\"keccak256\":\"0xbff9f59c84e5337689161ce7641c0ef8e872d6a7536fbc1f5133f128887aba3c\",\"license\":\"MIT\"},\"@openzeppelin/contracts/interfaces/IERC1363.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.4.0) (interfaces/IERC1363.sol)\\n\\npragma solidity >=0.6.2;\\n\\nimport {IERC20} from \\\"./IERC20.sol\\\";\\nimport {IERC165} from \\\"./IERC165.sol\\\";\\n\\n/**\\n * @title IERC1363\\n * @dev Interface of the ERC-1363 standard as defined in the https://eips.ethereum.org/EIPS/eip-1363[ERC-1363].\\n *\\n * Defines an extension interface for ERC-20 tokens that supports executing code on a recipient contract\\n * after `transfer` or `transferFrom`, or code on a spender contract after `approve`, in a single transaction.\\n */\\ninterface IERC1363 is IERC20, IERC165 {\\n    /*\\n     * Note: the ERC-165 identifier for this interface is 0xb0202a11.\\n     * 0xb0202a11 ===\\n     *   bytes4(keccak256('transferAndCall(address,uint256)')) ^\\n     *   bytes4(keccak256('transferAndCall(address,uint256,bytes)')) ^\\n     *   bytes4(keccak256('transferFromAndCall(address,address,uint256)')) ^\\n     *   bytes4(keccak256('transferFromAndCall(address,address,uint256,bytes)')) ^\\n     *   bytes4(keccak256('approveAndCall(address,uint256)')) ^\\n     *   bytes4(keccak256('approveAndCall(address,uint256,bytes)'))\\n     */\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from the caller's account to `to`\\n     * and then calls {IERC1363Receiver-onTransferReceived} on `to`.\\n     * @param to The address which you want to transfer to.\\n     * @param value The amount of tokens to be transferred.\\n     * @return A boolean value indicating whether the operation succeeded unless throwing.\\n     */\\n    function transferAndCall(address to, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from the caller's account to `to`\\n     * and then calls {IERC1363Receiver-onTransferReceived} on `to`.\\n     * @param to The address which you want to transfer to.\\n     * @param value The amount of tokens to be transferred.\\n     * @param data Additional data with no specified format, sent in call to `to`.\\n     * @return A boolean value indicating whether the operation succeeded unless throwing.\\n     */\\n    function transferAndCall(address to, uint256 value, bytes calldata data) external returns (bool);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from `from` to `to` using the allowance mechanism\\n     * and then calls {IERC1363Receiver-onTransferReceived} on `to`.\\n     * @param from The address which you want to send tokens from.\\n     * @param to The address which you want to transfer to.\\n     * @param value The amount of tokens to be transferred.\\n     * @return A boolean value indicating whether the operation succeeded unless throwing.\\n     */\\n    function transferFromAndCall(address from, address to, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from `from` to `to` using the allowance mechanism\\n     * and then calls {IERC1363Receiver-onTransferReceived} on `to`.\\n     * @param from The address which you want to send tokens from.\\n     * @param to The address which you want to transfer to.\\n     * @param value The amount of tokens to be transferred.\\n     * @param data Additional data with no specified format, sent in call to `to`.\\n     * @return A boolean value indicating whether the operation succeeded unless throwing.\\n     */\\n    function transferFromAndCall(address from, address to, uint256 value, bytes calldata data) external returns (bool);\\n\\n    /**\\n     * @dev Sets a `value` amount of tokens as the allowance of `spender` over the\\n     * caller's tokens and then calls {IERC1363Spender-onApprovalReceived} on `spender`.\\n     * @param spender The address which will spend the funds.\\n     * @param value The amount of tokens to be spent.\\n     * @return A boolean value indicating whether the operation succeeded unless throwing.\\n     */\\n    function approveAndCall(address spender, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Sets a `value` amount of tokens as the allowance of `spender` over the\\n     * caller's tokens and then calls {IERC1363Spender-onApprovalReceived} on `spender`.\\n     * @param spender The address which will spend the funds.\\n     * @param value The amount of tokens to be spent.\\n     * @param data Additional data with no specified format, sent in call to `spender`.\\n     * @return A boolean value indicating whether the operation succeeded unless throwing.\\n     */\\n    function approveAndCall(address spender, uint256 value, bytes calldata data) external returns (bool);\\n}\\n\",\"keccak256\":\"0xd5ea07362ab630a6a3dee4285a74cf2377044ca2e4be472755ad64d7c5d4b69d\",\"license\":\"MIT\"},\"@openzeppelin/contracts/interfaces/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.4.0) (interfaces/IERC165.sol)\\n\\npragma solidity >=0.4.16;\\n\\nimport {IERC165} from \\\"../utils/introspection/IERC165.sol\\\";\\n\",\"keccak256\":\"0x0afcb7e740d1537b252cb2676f600465ce6938398569f09ba1b9ca240dde2dfc\",\"license\":\"MIT\"},\"@openzeppelin/contracts/interfaces/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.4.0) (interfaces/IERC20.sol)\\n\\npragma solidity >=0.4.16;\\n\\nimport {IERC20} from \\\"../token/ERC20/IERC20.sol\\\";\\n\",\"keccak256\":\"0x1a6221315ce0307746c2c4827c125d821ee796c74a676787762f4778671d4f44\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.4.0) (token/ERC20/IERC20.sol)\\n\\npragma solidity >=0.4.16;\\n\\n/**\\n * @dev Interface of the ERC-20 standard as defined in the ERC.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /**\\n     * @dev Returns the value of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the value of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from the caller's account to `to`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address to, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets a `value` amount of tokens as the allowance of `spender` over the\\n     * caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from `from` to `to` using the\\n     * allowance mechanism. `value` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address from, address to, uint256 value) external returns (bool);\\n}\\n\",\"keccak256\":\"0x74ed01eb66b923d0d0cfe3be84604ac04b76482a55f9dd655e1ef4d367f95bc2\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.5.0) (token/ERC20/utils/SafeERC20.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC20} from \\\"../IERC20.sol\\\";\\nimport {IERC1363} from \\\"../../../interfaces/IERC1363.sol\\\";\\n\\n/**\\n * @title SafeERC20\\n * @dev Wrappers around ERC-20 operations that throw on failure (when the token\\n * contract returns false). Tokens that return no value (and instead revert or\\n * throw on failure) are also supported, non-reverting calls are assumed to be\\n * successful.\\n * To use this library you can add a `using SafeERC20 for IERC20;` statement to your contract,\\n * which allows you to call the safe operations as `token.safeTransfer(...)`, etc.\\n */\\nlibrary SafeERC20 {\\n    /**\\n     * @dev An operation with an ERC-20 token failed.\\n     */\\n    error SafeERC20FailedOperation(address token);\\n\\n    /**\\n     * @dev Indicates a failed `decreaseAllowance` request.\\n     */\\n    error SafeERC20FailedDecreaseAllowance(address spender, uint256 currentAllowance, uint256 requestedDecrease);\\n\\n    /**\\n     * @dev Transfer `value` amount of `token` from the calling contract to `to`. If `token` returns no value,\\n     * non-reverting calls are assumed to be successful.\\n     */\\n    function safeTransfer(IERC20 token, address to, uint256 value) internal {\\n        if (!_safeTransfer(token, to, value, true)) {\\n            revert SafeERC20FailedOperation(address(token));\\n        }\\n    }\\n\\n    /**\\n     * @dev Transfer `value` amount of `token` from `from` to `to`, spending the approval given by `from` to the\\n     * calling contract. If `token` returns no value, non-reverting calls are assumed to be successful.\\n     */\\n    function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {\\n        if (!_safeTransferFrom(token, from, to, value, true)) {\\n            revert SafeERC20FailedOperation(address(token));\\n        }\\n    }\\n\\n    /**\\n     * @dev Variant of {safeTransfer} that returns a bool instead of reverting if the operation is not successful.\\n     */\\n    function trySafeTransfer(IERC20 token, address to, uint256 value) internal returns (bool) {\\n        return _safeTransfer(token, to, value, false);\\n    }\\n\\n    /**\\n     * @dev Variant of {safeTransferFrom} that returns a bool instead of reverting if the operation is not successful.\\n     */\\n    function trySafeTransferFrom(IERC20 token, address from, address to, uint256 value) internal returns (bool) {\\n        return _safeTransferFrom(token, from, to, value, false);\\n    }\\n\\n    /**\\n     * @dev Increase the calling contract's allowance toward `spender` by `value`. If `token` returns no value,\\n     * non-reverting calls are assumed to be successful.\\n     *\\n     * IMPORTANT: If the token implements ERC-7674 (ERC-20 with temporary allowance), and if the \\\"client\\\"\\n     * smart contract uses ERC-7674 to set temporary allowances, then the \\\"client\\\" smart contract should avoid using\\n     * this function. Performing a {safeIncreaseAllowance} or {safeDecreaseAllowance} operation on a token contract\\n     * that has a non-zero temporary allowance (for that particular owner-spender) will result in unexpected behavior.\\n     */\\n    function safeIncreaseAllowance(IERC20 token, address spender, uint256 value) internal {\\n        uint256 oldAllowance = token.allowance(address(this), spender);\\n        forceApprove(token, spender, oldAllowance + value);\\n    }\\n\\n    /**\\n     * @dev Decrease the calling contract's allowance toward `spender` by `requestedDecrease`. If `token` returns no\\n     * value, non-reverting calls are assumed to be successful.\\n     *\\n     * IMPORTANT: If the token implements ERC-7674 (ERC-20 with temporary allowance), and if the \\\"client\\\"\\n     * smart contract uses ERC-7674 to set temporary allowances, then the \\\"client\\\" smart contract should avoid using\\n     * this function. Performing a {safeIncreaseAllowance} or {safeDecreaseAllowance} operation on a token contract\\n     * that has a non-zero temporary allowance (for that particular owner-spender) will result in unexpected behavior.\\n     */\\n    function safeDecreaseAllowance(IERC20 token, address spender, uint256 requestedDecrease) internal {\\n        unchecked {\\n            uint256 currentAllowance = token.allowance(address(this), spender);\\n            if (currentAllowance < requestedDecrease) {\\n                revert SafeERC20FailedDecreaseAllowance(spender, currentAllowance, requestedDecrease);\\n            }\\n            forceApprove(token, spender, currentAllowance - requestedDecrease);\\n        }\\n    }\\n\\n    /**\\n     * @dev Set the calling contract's allowance toward `spender` to `value`. If `token` returns no value,\\n     * non-reverting calls are assumed to be successful. Meant to be used with tokens that require the approval\\n     * to be set to zero before setting it to a non-zero value, such as USDT.\\n     *\\n     * NOTE: If the token implements ERC-7674, this function will not modify any temporary allowance. This function\\n     * only sets the \\\"standard\\\" allowance. Any temporary allowance will remain active, in addition to the value being\\n     * set here.\\n     */\\n    function forceApprove(IERC20 token, address spender, uint256 value) internal {\\n        if (!_safeApprove(token, spender, value, false)) {\\n            if (!_safeApprove(token, spender, 0, true)) revert SafeERC20FailedOperation(address(token));\\n            if (!_safeApprove(token, spender, value, true)) revert SafeERC20FailedOperation(address(token));\\n        }\\n    }\\n\\n    /**\\n     * @dev Performs an {ERC1363} transferAndCall, with a fallback to the simple {ERC20} transfer if the target has no\\n     * code. This can be used to implement an {ERC721}-like safe transfer that relies on {ERC1363} checks when\\n     * targeting contracts.\\n     *\\n     * Reverts if the returned value is other than `true`.\\n     */\\n    function transferAndCallRelaxed(IERC1363 token, address to, uint256 value, bytes memory data) internal {\\n        if (to.code.length == 0) {\\n            safeTransfer(token, to, value);\\n        } else if (!token.transferAndCall(to, value, data)) {\\n            revert SafeERC20FailedOperation(address(token));\\n        }\\n    }\\n\\n    /**\\n     * @dev Performs an {ERC1363} transferFromAndCall, with a fallback to the simple {ERC20} transferFrom if the target\\n     * has no code. This can be used to implement an {ERC721}-like safe transfer that relies on {ERC1363} checks when\\n     * targeting contracts.\\n     *\\n     * Reverts if the returned value is other than `true`.\\n     */\\n    function transferFromAndCallRelaxed(\\n        IERC1363 token,\\n        address from,\\n        address to,\\n        uint256 value,\\n        bytes memory data\\n    ) internal {\\n        if (to.code.length == 0) {\\n            safeTransferFrom(token, from, to, value);\\n        } else if (!token.transferFromAndCall(from, to, value, data)) {\\n            revert SafeERC20FailedOperation(address(token));\\n        }\\n    }\\n\\n    /**\\n     * @dev Performs an {ERC1363} approveAndCall, with a fallback to the simple {ERC20} approve if the target has no\\n     * code. This can be used to implement an {ERC721}-like safe transfer that rely on {ERC1363} checks when\\n     * targeting contracts.\\n     *\\n     * NOTE: When the recipient address (`to`) has no code (i.e. is an EOA), this function behaves as {forceApprove}.\\n     * Oppositely, when the recipient address (`to`) has code, this function only attempts to call {ERC1363-approveAndCall}\\n     * once without retrying, and relies on the returned value to be true.\\n     *\\n     * Reverts if the returned value is other than `true`.\\n     */\\n    function approveAndCallRelaxed(IERC1363 token, address to, uint256 value, bytes memory data) internal {\\n        if (to.code.length == 0) {\\n            forceApprove(token, to, value);\\n        } else if (!token.approveAndCall(to, value, data)) {\\n            revert SafeERC20FailedOperation(address(token));\\n        }\\n    }\\n\\n    /**\\n     * @dev Imitates a Solidity `token.transfer(to, value)` call, relaxing the requirement on the return value: the\\n     * return value is optional (but if data is returned, it must not be false).\\n     *\\n     * @param token The token targeted by the call.\\n     * @param to The recipient of the tokens\\n     * @param value The amount of token to transfer\\n     * @param bubble Behavior switch if the transfer call reverts: bubble the revert reason or return a false boolean.\\n     */\\n    function _safeTransfer(IERC20 token, address to, uint256 value, bool bubble) private returns (bool success) {\\n        bytes4 selector = IERC20.transfer.selector;\\n\\n        assembly (\\\"memory-safe\\\") {\\n            let fmp := mload(0x40)\\n            mstore(0x00, selector)\\n            mstore(0x04, and(to, shr(96, not(0))))\\n            mstore(0x24, value)\\n            success := call(gas(), token, 0, 0x00, 0x44, 0x00, 0x20)\\n            // if call success and return is true, all is good.\\n            // otherwise (not success or return is not true), we need to perform further checks\\n            if iszero(and(success, eq(mload(0x00), 1))) {\\n                // if the call was a failure and bubble is enabled, bubble the error\\n                if and(iszero(success), bubble) {\\n                    returndatacopy(fmp, 0x00, returndatasize())\\n                    revert(fmp, returndatasize())\\n                }\\n                // if the return value is not true, then the call is only successful if:\\n                // - the token address has code\\n                // - the returndata is empty\\n                success := and(success, and(iszero(returndatasize()), gt(extcodesize(token), 0)))\\n            }\\n            mstore(0x40, fmp)\\n        }\\n    }\\n\\n    /**\\n     * @dev Imitates a Solidity `token.transferFrom(from, to, value)` call, relaxing the requirement on the return\\n     * value: the return value is optional (but if data is returned, it must not be false).\\n     *\\n     * @param token The token targeted by the call.\\n     * @param from The sender of the tokens\\n     * @param to The recipient of the tokens\\n     * @param value The amount of token to transfer\\n     * @param bubble Behavior switch if the transfer call reverts: bubble the revert reason or return a false boolean.\\n     */\\n    function _safeTransferFrom(\\n        IERC20 token,\\n        address from,\\n        address to,\\n        uint256 value,\\n        bool bubble\\n    ) private returns (bool success) {\\n        bytes4 selector = IERC20.transferFrom.selector;\\n\\n        assembly (\\\"memory-safe\\\") {\\n            let fmp := mload(0x40)\\n            mstore(0x00, selector)\\n            mstore(0x04, and(from, shr(96, not(0))))\\n            mstore(0x24, and(to, shr(96, not(0))))\\n            mstore(0x44, value)\\n            success := call(gas(), token, 0, 0x00, 0x64, 0x00, 0x20)\\n            // if call success and return is true, all is good.\\n            // otherwise (not success or return is not true), we need to perform further checks\\n            if iszero(and(success, eq(mload(0x00), 1))) {\\n                // if the call was a failure and bubble is enabled, bubble the error\\n                if and(iszero(success), bubble) {\\n                    returndatacopy(fmp, 0x00, returndatasize())\\n                    revert(fmp, returndatasize())\\n                }\\n                // if the return value is not true, then the call is only successful if:\\n                // - the token address has code\\n                // - the returndata is empty\\n                success := and(success, and(iszero(returndatasize()), gt(extcodesize(token), 0)))\\n            }\\n            mstore(0x40, fmp)\\n            mstore(0x60, 0)\\n        }\\n    }\\n\\n    /**\\n     * @dev Imitates a Solidity `token.approve(spender, value)` call, relaxing the requirement on the return value:\\n     * the return value is optional (but if data is returned, it must not be false).\\n     *\\n     * @param token The token targeted by the call.\\n     * @param spender The spender of the tokens\\n     * @param value The amount of token to transfer\\n     * @param bubble Behavior switch if the transfer call reverts: bubble the revert reason or return a false boolean.\\n     */\\n    function _safeApprove(IERC20 token, address spender, uint256 value, bool bubble) private returns (bool success) {\\n        bytes4 selector = IERC20.approve.selector;\\n\\n        assembly (\\\"memory-safe\\\") {\\n            let fmp := mload(0x40)\\n            mstore(0x00, selector)\\n            mstore(0x04, and(spender, shr(96, not(0))))\\n            mstore(0x24, value)\\n            success := call(gas(), token, 0, 0x00, 0x44, 0x00, 0x20)\\n            // if call success and return is true, all is good.\\n            // otherwise (not success or return is not true), we need to perform further checks\\n            if iszero(and(success, eq(mload(0x00), 1))) {\\n                // if the call was a failure and bubble is enabled, bubble the error\\n                if and(iszero(success), bubble) {\\n                    returndatacopy(fmp, 0x00, returndatasize())\\n                    revert(fmp, returndatasize())\\n                }\\n                // if the return value is not true, then the call is only successful if:\\n                // - the token address has code\\n                // - the returndata is empty\\n                success := and(success, and(iszero(returndatasize()), gt(extcodesize(token), 0)))\\n            }\\n            mstore(0x40, fmp)\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x304d732678032a9781ae85c8f204c8fba3d3a5e31c02616964e75cfdc5049098\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.1) (utils/Context.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n\\n    function _contextSuffixLength() internal view virtual returns (uint256) {\\n        return 0;\\n    }\\n}\\n\",\"keccak256\":\"0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Pausable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.3.0) (utils/Pausable.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {Context} from \\\"../utils/Context.sol\\\";\\n\\n/**\\n * @dev Contract module which allows children to implement an emergency stop\\n * mechanism that can be triggered by an authorized account.\\n *\\n * This module is used through inheritance. It will make available the\\n * modifiers `whenNotPaused` and `whenPaused`, which can be applied to\\n * the functions of your contract. Note that they will not be pausable by\\n * simply including this module, only once the modifiers are put in place.\\n */\\nabstract contract Pausable is Context {\\n    bool private _paused;\\n\\n    /**\\n     * @dev Emitted when the pause is triggered by `account`.\\n     */\\n    event Paused(address account);\\n\\n    /**\\n     * @dev Emitted when the pause is lifted by `account`.\\n     */\\n    event Unpaused(address account);\\n\\n    /**\\n     * @dev The operation failed because the contract is paused.\\n     */\\n    error EnforcedPause();\\n\\n    /**\\n     * @dev The operation failed because the contract is not paused.\\n     */\\n    error ExpectedPause();\\n\\n    /**\\n     * @dev Modifier to make a function callable only when the contract is not paused.\\n     *\\n     * Requirements:\\n     *\\n     * - The contract must not be paused.\\n     */\\n    modifier whenNotPaused() {\\n        _requireNotPaused();\\n        _;\\n    }\\n\\n    /**\\n     * @dev Modifier to make a function callable only when the contract is paused.\\n     *\\n     * Requirements:\\n     *\\n     * - The contract must be paused.\\n     */\\n    modifier whenPaused() {\\n        _requirePaused();\\n        _;\\n    }\\n\\n    /**\\n     * @dev Returns true if the contract is paused, and false otherwise.\\n     */\\n    function paused() public view virtual returns (bool) {\\n        return _paused;\\n    }\\n\\n    /**\\n     * @dev Throws if the contract is paused.\\n     */\\n    function _requireNotPaused() internal view virtual {\\n        if (paused()) {\\n            revert EnforcedPause();\\n        }\\n    }\\n\\n    /**\\n     * @dev Throws if the contract is not paused.\\n     */\\n    function _requirePaused() internal view virtual {\\n        if (!paused()) {\\n            revert ExpectedPause();\\n        }\\n    }\\n\\n    /**\\n     * @dev Triggers stopped state.\\n     *\\n     * Requirements:\\n     *\\n     * - The contract must not be paused.\\n     */\\n    function _pause() internal virtual whenNotPaused {\\n        _paused = true;\\n        emit Paused(_msgSender());\\n    }\\n\\n    /**\\n     * @dev Returns to normal state.\\n     *\\n     * Requirements:\\n     *\\n     * - The contract must be paused.\\n     */\\n    function _unpause() internal virtual whenPaused {\\n        _paused = false;\\n        emit Unpaused(_msgSender());\\n    }\\n}\\n\",\"keccak256\":\"0xdb484371dfbb848cb6f5d70464e9ac9b2900e4164ead76bbce4fef0b44bcc68f\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/ERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.4.0) (utils/introspection/ERC165.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC165} from \\\"./IERC165.sol\\\";\\n\\n/**\\n * @dev Implementation of the {IERC165} interface.\\n *\\n * Contracts that want to implement ERC-165 should inherit from this contract and override {supportsInterface} to check\\n * for the additional interface id that will be supported. For example:\\n *\\n * ```solidity\\n * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);\\n * }\\n * ```\\n */\\nabstract contract ERC165 is IERC165 {\\n    /// @inheritdoc IERC165\\n    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {\\n        return interfaceId == type(IERC165).interfaceId;\\n    }\\n}\\n\",\"keccak256\":\"0x2d9dc2fe26180f74c11c13663647d38e259e45f95eb88f57b61d2160b0109d3e\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.4.0) (utils/introspection/IERC165.sol)\\n\\npragma solidity >=0.4.16;\\n\\n/**\\n * @dev Interface of the ERC-165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[ERC].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[ERC section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x8891738ffe910f0cf2da09566928589bf5d63f4524dd734fd9cedbac3274dd5c\",\"license\":\"MIT\"},\"contracts/VaultManager.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.24;\\n\\nimport \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\n// SafeERC20: \\\"g\\u0103ng tay an to\\u00e0n\\\" khi c\\u1ea7m ti\\u1ec1n ng\\u01b0\\u1eddi kh\\u00e1c - b\\u1ecdc quanh transfer/transferFrom\\n// \\u0111\\u1ec3 tr\\u00e1nh l\\u1ed7i v\\u1edbi c\\u00e1c token ERC20 kh\\u00f4ng tu\\u00e2n th\\u1ee7 chu\\u1ea9n 100% (m\\u1ed9t s\\u1ed1 token kh\\u00f4ng revert khi fail,\\n// ch\\u1ec9 tr\\u1ea3 v\\u1ec1 false - n\\u1ebfu kh\\u00f4ng d\\u00f9ng SafeERC20, contract c\\u00f3 th\\u1ec3 t\\u01b0\\u1edfng chuy\\u1ec3n ti\\u1ec1n th\\u00e0nh c\\u00f4ng nh\\u01b0ng th\\u1ef1c ra kh\\u00f4ng).\\nimport \\\"@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol\\\";\\nimport \\\"@openzeppelin/contracts/access/AccessControl.sol\\\";\\nimport \\\"@openzeppelin/contracts/utils/Pausable.sol\\\";\\n\\n/**\\n * @title VaultManager\\n * @notice \\\"Kho b\\u1ea1c\\\" c\\u1ee7a h\\u1ec7 th\\u1ed1ng - CH\\u1ec8 gi\\u1eef ti\\u1ec1n d\\u00f9ng \\u0111\\u1ec3 tr\\u1ea3 L\\u00c3I cho user.\\n *         KH\\u00d4NG gi\\u1eef ti\\u1ec1n g\\u1ed1c (principal) - ti\\u1ec1n g\\u1ed1c n\\u1eb1m trong SavingCore.\\n * @dev \\u0110\\u00e2y ch\\u00ednh l\\u00e0 ki\\u1ebfn tr\\u00fac hi\\u1ec7n th\\u1ef1c h\\u00f3a Business Rule #5 (M\\u1ee5c 6 \\u0111\\u1ec1 b\\u00e0i):\\n *      \\\"L\\u00e3i lu\\u00f4n \\u0111\\u01b0\\u1ee3c tr\\u1ea3 t\\u1eeb vault, t\\u00e1ch bi\\u1ec7t kh\\u1ecfi principal\\\".\\n *      VaultManager KH\\u00d4NG h\\u1ec1 bi\\u1ebft g\\u00ec v\\u1ec1 Plan, Deposit, APR - n\\u00f3 ch\\u1ec9 bi\\u1ebft gi\\u1eef ti\\u1ec1n v\\u00e0\\n *      chuy\\u1ec3n ti\\u1ec1n theo l\\u1ec7nh c\\u1ee7a SavingCore.\\n */\\ncontract VaultManager is AccessControl, Pausable {\\n    using SafeERC20 for IERC20;\\n\\n    // Role d\\u00f9ng cho AccessControl - thay v\\u00ec ch\\u1ec9 c\\u00f3 1 \\\"owner\\\" duy nh\\u1ea5t (Ownable),\\n    // AccessControl cho ph\\u00e9p \\u0111\\u1ecbnh ngh\\u0129a nhi\\u1ec1u vai tr\\u00f2 kh\\u00e1c nhau, r\\u00f5 r\\u00e0ng h\\u01a1n khi h\\u1ec7 th\\u1ed1ng\\n    // c\\u00f3 nhi\\u1ec1u lo\\u1ea1i quy\\u1ec1n (\\u1edf \\u0111\\u00e2y ch\\u1ec9 c\\u00f3 ADMIN_ROLE, nh\\u01b0ng thi\\u1ebft k\\u1ebf m\\u1edf \\u0111\\u1ec3 d\\u1ec5 m\\u1edf r\\u1ed9ng).\\n    bytes32 public constant ADMIN_ROLE = keccak256(\\\"ADMIN_ROLE\\\");\\n\\n    // Token d\\u00f9ng \\u0111\\u1ec3 tr\\u1ea3 l\\u00e3i (MockUSDC). \\\"immutable\\\" = ch\\u1ec9 set \\u0111\\u01b0\\u1ee3c 1 l\\u1ea7n l\\u00fac deploy,\\n    // sau \\u0111\\u00f3 kh\\u00f4ng \\u0111\\u1ed5i \\u0111\\u01b0\\u1ee3c n\\u1eefa -> ti\\u1ebft ki\\u1ec7m gas khi \\u0111\\u1ecdc, v\\u00e0 tr\\u00e1nh admin \\u0111\\u1ed5i token gi\\u1eefa ch\\u1eebng.\\n    IERC20 public immutable token;\\n\\n    // \\u0110\\u1ecba ch\\u1ec9 contract SavingCore - CH\\u1ec8 \\u0111\\u1ecba ch\\u1ec9 n\\u00e0y \\u0111\\u01b0\\u1ee3c ph\\u00e9p g\\u1ecdi payInterest().\\n    // \\u0110\\u00e2y l\\u00e0 \\\"chu\\u1ed7i \\u1ee7y quy\\u1ec1n 1 chi\\u1ec1u\\\" \\u0111\\u00e3 thi\\u1ebft k\\u1ebf \\u1edf Ng\\u00e0y 2: User -> SavingCore (ki\\u1ec3m tra \\u0111\\u1ea7y \\u0111\\u1ee7)\\n    // -> VaultManager (ch\\u1ec9 tin SavingCore).\\n    address public coreAddress;\\n\\n    // ==================== EVENTS ====================\\n    // Ghi l\\u1ea1i l\\u1ecbch s\\u1eed n\\u1ea1p/r\\u00fat vault - kh\\u00f4ng b\\u1eaft bu\\u1ed9c theo M\\u1ee5c 5 (5 event b\\u1eaft bu\\u1ed9c n\\u1eb1m \\u1edf\\n    // SavingCore), nh\\u01b0ng n\\u00ean c\\u00f3 \\u0111\\u1ec3 d\\u1ec5 theo d\\u00f5i ho\\u1ea1t \\u0111\\u1ed9ng vault qua block explorer.\\n    event VaultFunded(address indexed from, uint256 amount);\\n    event VaultWithdrawn(address indexed to, uint256 amount);\\n    event InterestPaid(address indexed to, uint256 amount);\\n    event CoreAddressSet(address indexed core);\\n\\n    /**\\n     * @param _token \\u0110\\u1ecba ch\\u1ec9 MockUSDC (ho\\u1eb7c USDC th\\u1eadt sau n\\u00e0y)\\n     */\\n    constructor(address _token) {\\n        require(_token != address(0), \\\"token address is zero\\\");\\n        token = IERC20(_token);\\n\\n        // Ng\\u01b0\\u1eddi deploy contract t\\u1ef1 \\u0111\\u1ed9ng c\\u00f3 ADMIN_ROLE.\\n        // DEFAULT_ADMIN_ROLE (c\\u00f3 s\\u1eb5n t\\u1eeb AccessControl) cho ph\\u00e9p ng\\u01b0\\u1eddi n\\u00e0y C\\u1ea4P/THU H\\u1ed2I\\n        // role cho ng\\u01b0\\u1eddi kh\\u00e1c sau n\\u00e0y - \\u0111\\u00e2y l\\u00e0 \\\"quy\\u1ec1n cao nh\\u1ea5t\\\".\\n        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);\\n        _grantRole(ADMIN_ROLE, msg.sender);\\n    }\\n\\n    /**\\n     * @dev Modifier t\\u00f9y ch\\u1ec9nh (kh\\u00f4ng c\\u00f3 s\\u1eb5n t\\u1eeb OpenZeppelin) - \\u0111\\u00e2y ch\\u00ednh l\\u00e0 d\\u00f2ng code\\n     *      QUAN TR\\u1eccNG NH\\u1ea4T c\\u1ee7a c\\u1ea3 file n\\u00e0y. N\\u00f3 \\u0111\\u1ea3m b\\u1ea3o payInterest() ch\\u1ec9 c\\u00f3 th\\u1ec3 \\u0111\\u01b0\\u1ee3c\\n     *      g\\u1ecdi b\\u1edfi \\u0111\\u00fang 1 \\u0111\\u1ecba ch\\u1ec9: contract SavingCore.\\n     *      N\\u1ebfu thi\\u1ebfu modifier n\\u00e0y, B\\u1ea4T K\\u1ef2 AI c\\u0169ng g\\u1ecdi \\u0111\\u01b0\\u1ee3c payInterest() v\\u00e0 r\\u00fat s\\u1ea1ch vault\\n     *      m\\u00e0 kh\\u00f4ng c\\u1ea7n m\\u1edf deposit g\\u00ec c\\u1ea3 - \\u0111\\u00e2y l\\u00e0 l\\u1ed7 h\\u1ed5ng \\\"attack thinking\\\" \\u0111i\\u1ec3n h\\u00ecnh\\n     *      (c\\u00e2u h\\u1ecfi m\\u1edf #7 trong \\u0111\\u1ec1).\\n     */\\n    modifier onlyCore() {\\n        require(msg.sender == coreAddress, \\\"VaultManager: caller is not SavingCore\\\");\\n        _;\\n    }\\n\\n    // ==================== ADMIN FUNCTIONS ====================\\n\\n    /**\\n     * @notice G\\u1eafn \\u0111\\u1ecba ch\\u1ec9 contract SavingCore v\\u00e0o vault - ch\\u1ec9 g\\u1ecdi 1 l\\u1ea7n sau khi deploy c\\u1ea3 2 contract.\\n     * @dev \\u0110\\u00e2y l\\u00e0 b\\u01b0\\u1edbc \\\"n\\u1ed1i d\\u00e2y\\\" gi\\u1eefa 2 contract, l\\u00e0m th\\u1ee7 c\\u00f4ng sau khi deploy (kh\\u00f4ng th\\u1ec3 t\\u1ef1 \\u0111\\u1ed9ng\\n     *      v\\u00ec l\\u00fac deploy VaultManager, SavingCore ch\\u01b0a t\\u1ed3n t\\u1ea1i - v\\u00e0 ng\\u01b0\\u1ee3c l\\u1ea1i n\\u1ebfu deploy\\n     *      SavingCore tr\\u01b0\\u1edbc th\\u00ec c\\u0169ng ch\\u01b0a c\\u00f3 \\u0111\\u1ecba ch\\u1ec9 VaultManager).\\n     */\\n    function setCoreAddress(address core) external onlyRole(ADMIN_ROLE) {\\n        require(core != address(0), \\\"core address is zero\\\");\\n        coreAddress = core;\\n        emit CoreAddressSet(core);\\n    }\\n\\n    /**\\n     * @notice Admin n\\u1ea1p th\\u00eam ti\\u1ec1n v\\u00e0o vault \\u0111\\u1ec3 \\u0111\\u1ea3m b\\u1ea3o \\u0111\\u1ee7 thanh kho\\u1ea3n tr\\u1ea3 l\\u00e3i cho user.\\n     * @dev CH\\u1ec8 ADMIN g\\u1ecdi \\u0111\\u01b0\\u1ee3c (kh\\u00f4ng m\\u1edf public) - \\u0111\\u1ed1i x\\u1ee9ng v\\u1edbi withdrawVault(), v\\u00e0 kh\\u1edbp v\\u1edbi\\n     *      M\\u1ee5c 4 \\u0111\\u1ec1 b\\u00e0i li\\u1ec7t k\\u00ea fundVault n\\u1eb1m trong nh\\u00f3m \\\"Admin Functions\\\".\\n     *      Admin ph\\u1ea3i approve() cho VaultManager tr\\u01b0\\u1edbc khi g\\u1ecdi h\\u00e0m n\\u00e0y (chu\\u1ea9n ERC20).\\n     */\\n    function fundVault(uint256 amount) external onlyRole(ADMIN_ROLE) {\\n        require(amount > 0, \\\"amount must be > 0\\\");\\n        token.safeTransferFrom(msg.sender, address(this), amount);\\n        emit VaultFunded(msg.sender, amount);\\n    }\\n\\n    /**\\n     * @notice Admin r\\u00fat b\\u1edbt ti\\u1ec1n kh\\u1ecfi vault (v\\u00ed d\\u1ee5 khi vault d\\u01b0 th\\u1eeba qu\\u00e1 nhi\\u1ec1u).\\n     * @dev \\u0110\\u00e2y l\\u00e0 h\\u00e0m NH\\u1ea0Y C\\u1ea2M NH\\u1ea4T trong contract - ch\\u1ec9 admin, v\\u00e0 v\\u1ec1 sau (Creative Challenge C2)\\n     *      n\\u00ean th\\u00eam \\\"solvency guard\\\" \\u0111\\u1ec3 ch\\u1eb7n admin r\\u00fat v\\u01b0\\u1ee3t qu\\u00e1 s\\u1ed1 ti\\u1ec1n \\u0111\\u00e3 cam k\\u1ebft tr\\u1ea3 cho\\n     *      c\\u00e1c deposit \\u0111ang active. \\u1ede Ng\\u00e0y 3 n\\u00e0y CH\\u01afA l\\u00e0m C2, ch\\u1ec9 c\\u00f3 b\\u1ea3n c\\u01a1 b\\u1ea3n.\\n     */\\n    function withdrawVault(uint256 amount) external onlyRole(ADMIN_ROLE) {\\n        require(amount > 0, \\\"amount must be > 0\\\");\\n        require(amount <= token.balanceOf(address(this)), \\\"insufficient vault balance\\\");\\n        token.safeTransfer(msg.sender, amount);\\n        emit VaultWithdrawn(msg.sender, amount);\\n    }\\n\\n    function pause() external onlyRole(ADMIN_ROLE) {\\n        _pause();\\n    }\\n\\n    function unpause() external onlyRole(ADMIN_ROLE) {\\n        _unpause();\\n    }\\n\\n    // ==================== CORE-ONLY FUNCTION ====================\\n\\n    /**\\n     * @notice Tr\\u1ea3 l\\u00e3i cho user - \\u0110\\u00c2Y L\\u00c0 H\\u00c0M DUY NH\\u1ea4T khi\\u1ebfn ti\\u1ec1n r\\u1eddi kh\\u1ecfi vault \\u0111\\u1ec3 tr\\u1ea3 l\\u00e3i.\\n     * @dev onlyCore + whenNotPaused: ch\\u1ec9 SavingCore g\\u1ecdi \\u0111\\u01b0\\u1ee3c, v\\u00e0 b\\u1ecb ch\\u1eb7n khi h\\u1ec7 th\\u1ed1ng pause\\n     *      (kh\\u1edbp Business Rule #6 - pause ch\\u1eb7n withdraw/renew, m\\u00e0 withdraw/renew \\u0111\\u1ec1u c\\u1ea7n g\\u1ecdi\\n     *      h\\u00e0m n\\u00e0y \\u0111\\u1ec3 l\\u1ea5y l\\u00e3i).\\n     *      Business Rule #5 (M\\u1ee5c 6): n\\u1ebfu vault kh\\u00f4ng \\u0111\\u1ee7 ti\\u1ec1n, giao d\\u1ecbch PH\\u1ea2I revert (th\\u1ea5t b\\u1ea1i)\\n     *      - d\\u00f2ng require() b\\u00ean d\\u01b0\\u1edbi ch\\u00ednh l\\u00e0 ch\\u1ed7 hi\\u1ec7n th\\u1ef1c h\\u00f3a quy t\\u1eafc n\\u00e0y.\\n     * @param to \\u0110\\u1ecba ch\\u1ec9 user nh\\u1eadn l\\u00e3i\\n     * @param amount S\\u1ed1 ti\\u1ec1n l\\u00e3i c\\u1ea7n tr\\u1ea3\\n     */\\n    function payInterest(address to, uint256 amount) external onlyCore whenNotPaused {\\n        require(amount <= token.balanceOf(address(this)), \\\"vault: insufficient funds for interest\\\");\\n        token.safeTransfer(to, amount);\\n        emit InterestPaid(to, amount);\\n    }\\n\\n    // ==================== VIEW FUNCTIONS ====================\\n\\n    /**\\n     * @notice Xem vault hi\\u1ec7n \\u0111ang gi\\u1eef bao nhi\\u00eau ti\\u1ec1n - d\\u00f9ng \\u0111\\u1ec3 ki\\u1ec3m tra tr\\u01b0\\u1edbc khi r\\u00fat/tr\\u1ea3 l\\u00e3i,\\n     *         ho\\u1eb7c \\u0111\\u1ec3 frontend hi\\u1ec3n th\\u1ecb t\\u00ecnh tr\\u1ea1ng thanh kho\\u1ea3n.\\n     * @dev \\\"view\\\" = ch\\u1ec9 \\u0111\\u1ecdc d\\u1eef li\\u1ec7u, kh\\u00f4ng t\\u1ed1n gas th\\u1eadt khi g\\u1ecdi t\\u1eeb b\\u00ean ngo\\u00e0i (off-chain).\\n     */\\n    function getAvailableBalance() external view returns (uint256) {\\n        return token.balanceOf(address(this));\\n    }\\n}\\n\",\"keccak256\":\"0x3713eaf35e07f3add4b05b3b3993059f09667664eb0a4643df286cbe335fea89\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60a0346100e757601f61102438819003918201601f19168301916001600160401b038311848410176100eb578084926020946040528339810103126100e757516001600160a01b038116908190036100e75780156100a257608052610063336100ff565b5061006d33610175565b50604051610dbb9081610209823960805181818161010101528181610196015281816102d30152818161059801526108110152f35b60405162461bcd60e51b815260206004820152601560248201527f746f6b656e2061646472657373206973207a65726f00000000000000000000006044820152606490fd5b5f80fd5b634e487b7160e01b5f52604160045260245ffd5b6001600160a01b0381165f9081525f5160206110045f395f51905f52602052604090205460ff16610170576001600160a01b03165f8181525f5160206110045f395f51905f5260205260408120805460ff191660011790553391905f516020610fc45f395f51905f528180a4600190565b505f90565b6001600160a01b0381165f9081525f516020610fe45f395f51905f52602052604090205460ff16610170576001600160a01b03165f8181525f516020610fe45f395f51905f5260205260408120805460ff191660011790553391907fa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775905f516020610fc45f395f51905f529080a460019056fe6080806040526004361015610012575f80fd5b5f3560e01c90816301ffc9a7146109b3575080631b7623be146107d55780631c0ad646146107ac578063248a9ca31461077a5780632f2ff15d1461073d57806336568abe146106e05780633f4ba83a146106615780635c975abb1461063f57806375b238fc14610605578063809dab6a146105655780638456cb591461050d57806391aad2391461042c57806391d14854146103e3578063a217fddf146103c9578063abe73ef5146102aa578063b40afc1c1461016d578063d547741f146101295763fc0c546a146100e2575f80fd5b34610125575f3660031901126101255760206040516001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000168152f35b5f80fd5b346101255760403660031901126101255761016b600435610148610a67565b90610166610161825f525f602052600160405f20015490565b610c35565b610d02565b005b3461012557602036600319011261012557600435610189610bc6565b610194811515610acc565b7f00000000000000000000000000000000000000000000000000000000000000006040516370a0823160e01b81523060048201526020816024816001600160a01b0386165afa90811561029f575f9161026d575b50821161022957816101fb913390610b4b565b6040519081527f1b5775af7e7537be20684ccf94b9c6f4b180dabad653f5b57a234a9c6a3db40b60203392a2005b606460405162461bcd60e51b815260206004820152601a60248201527f696e73756666696369656e74207661756c742062616c616e63650000000000006044820152fd5b90506020813d602011610297575b8161028860209383610a7d565b810103126101255751836101e8565b3d915061027b565b6040513d5f823e3d90fd5b34610125576020366003190112610125576004356102c6610bc6565b6102d1811515610acc565b7f000000000000000000000000000000000000000000000000000000000000000090604051917f23b872dd000000000000000000000000000000000000000000000000000000005f5233600452306024528160445260205f60648180855af160015f51148116156103aa575b836040525f60605215610375575081527fba24bd9b798cca64d1031eda1ced9398802343e44e07779bb510d7a21ddddef160203392a2005b6001600160a01b03907f5274afe7000000000000000000000000000000000000000000000000000000005f521660045260245ffd5b60018115166103c057813b15153d15161661033d565b833d5f823e3d90fd5b34610125575f3660031901126101255760206040515f8152f35b34610125576040366003190112610125576103fc610a67565b6004355f525f6020526001600160a01b0360405f2091165f52602052602060ff60405f2054166040519015158152f35b3461012557602036600319011261012557610445610a51565b61044d610bc6565b6001600160a01b0381169081156104c9577fffffffffffffffffffffff0000000000000000000000000000000000000000ff74ffffffffffffffffffffffffffffffffffffffff006001549260081b169116176001557f76e9c0f5fdb0fbf94421f62c0e99459ad504905d46356a7cef58cf4513485fde5f80a2005b606460405162461bcd60e51b815260206004820152601460248201527f636f72652061646472657373206973207a65726f0000000000000000000000006044820152fd5b34610125575f36600319011261012557610525610bc6565b61052d610b17565b600160ff19815416176001557f62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a2586020604051338152a1005b34610125575f366003190112610125576040516370a0823160e01b81523060048201526020816024816001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000165afa801561029f575f906105d2575b602090604051908152f35b506020813d6020116105fd575b816105ec60209383610a7d565b8101031261012557602090516105c7565b3d91506105df565b34610125575f3660031901126101255760206040517fa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c217758152f35b34610125575f36600319011261012557602060ff600154166040519015158152f35b34610125575f36600319011261012557610679610bc6565b60015460ff8116156106b85760ff19166001557f5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa6020604051338152a1005b7f8dfc202b000000000000000000000000000000000000000000000000000000005f5260045ffd5b34610125576040366003190112610125576106f9610a67565b336001600160a01b038216036107155761016b90600435610d02565b7f6697b232000000000000000000000000000000000000000000000000000000005f5260045ffd5b346101255760403660031901126101255761016b60043561075c610a67565b90610775610161825f525f602052600160405f20015490565b610c75565b346101255760203660031901126101255760206107a46004355f525f602052600160405f20015490565b604051908152f35b34610125575f3660031901126101255760206001600160a01b0360015460081c16604051908152f35b34610125576040366003190112610125576107ee610a51565b602435906001600160a01b0360015460081c1633036109495761080f610b17565b7f0000000000000000000000000000000000000000000000000000000000000000906040516370a0823160e01b81523060048201526020816024816001600160a01b0387165afa90811561029f575f91610917575b5083116108ad576001600160a01b03816108a2856020947f16cbc685358ca7d4e6b273dcdf2cb5d18c80b950aa2319b519756cd016233a6c96610b4b565b6040519485521692a2005b608460405162461bcd60e51b815260206004820152602660248201527f7661756c743a20696e73756666696369656e742066756e647320666f7220696e60448201527f74657265737400000000000000000000000000000000000000000000000000006064820152fd5b90506020813d602011610941575b8161093260209383610a7d565b81010312610125575184610864565b3d9150610925565b608460405162461bcd60e51b815260206004820152602660248201527f5661756c744d616e616765723a2063616c6c6572206973206e6f74205361766960448201527f6e67436f726500000000000000000000000000000000000000000000000000006064820152fd5b3461012557602036600319011261012557600435907fffffffff00000000000000000000000000000000000000000000000000000000821680920361012557817f7965db0b0000000000000000000000000000000000000000000000000000000060209314908115610a27575b5015158152f35b7f01ffc9a70000000000000000000000000000000000000000000000000000000091501483610a20565b600435906001600160a01b038216820361012557565b602435906001600160a01b038216820361012557565b90601f8019910116810190811067ffffffffffffffff821117610a9f57604052565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52604160045260245ffd5b15610ad357565b606460405162461bcd60e51b815260206004820152601260248201527f616d6f756e74206d757374206265203e203000000000000000000000000000006044820152fd5b60ff60015416610b2357565b7fd93c0665000000000000000000000000000000000000000000000000000000005f5260045ffd5b916001600160a01b03604051927fa9059cbb000000000000000000000000000000000000000000000000000000005f521660045260245260205f60448180865af19060015f5114821615610ba5575b604052156103755750565b906001811516610bbd57823b15153d15161690610b9a565b503d5f823e3d90fd5b335f9081527f7d7ffb7a348e1c6a02869081a26547b49160dd3df72d1d75a570eb9b698292ec602052604090205460ff1615610bfe57565b63e2517d3f60e01b5f52336004527fa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c2177560245260445ffd5b805f525f60205260405f206001600160a01b0333165f5260205260ff60405f20541615610c5f5750565b63e2517d3f60e01b5f523360045260245260445ffd5b805f525f60205260405f206001600160a01b0383165f5260205260ff60405f205416155f14610cfc57805f525f60205260405f206001600160a01b0383165f5260205260405f20600160ff198254161790556001600160a01b03339216907f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d5f80a4600190565b50505f90565b805f525f60205260405f206001600160a01b0383165f5260205260ff60405f2054165f14610cfc57805f525f60205260405f206001600160a01b0383165f5260205260405f2060ff1981541690556001600160a01b03339216907ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b5f80a460019056fea2646970667358221220660a7a6cc89bef1415200c62ed1c1decb6d15c496f05814f0ce681df68d13bb964736f6c634300081c00332f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d7d7ffb7a348e1c6a02869081a26547b49160dd3df72d1d75a570eb9b698292ecad3228b676f7d3cd4284a5443f17f1962b36e491b30a40b2405849e597ba5fb5",
+  "deployedBytecode": "0x6080806040526004361015610012575f80fd5b5f3560e01c90816301ffc9a7146109b3575080631b7623be146107d55780631c0ad646146107ac578063248a9ca31461077a5780632f2ff15d1461073d57806336568abe146106e05780633f4ba83a146106615780635c975abb1461063f57806375b238fc14610605578063809dab6a146105655780638456cb591461050d57806391aad2391461042c57806391d14854146103e3578063a217fddf146103c9578063abe73ef5146102aa578063b40afc1c1461016d578063d547741f146101295763fc0c546a146100e2575f80fd5b34610125575f3660031901126101255760206040516001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000168152f35b5f80fd5b346101255760403660031901126101255761016b600435610148610a67565b90610166610161825f525f602052600160405f20015490565b610c35565b610d02565b005b3461012557602036600319011261012557600435610189610bc6565b610194811515610acc565b7f00000000000000000000000000000000000000000000000000000000000000006040516370a0823160e01b81523060048201526020816024816001600160a01b0386165afa90811561029f575f9161026d575b50821161022957816101fb913390610b4b565b6040519081527f1b5775af7e7537be20684ccf94b9c6f4b180dabad653f5b57a234a9c6a3db40b60203392a2005b606460405162461bcd60e51b815260206004820152601a60248201527f696e73756666696369656e74207661756c742062616c616e63650000000000006044820152fd5b90506020813d602011610297575b8161028860209383610a7d565b810103126101255751836101e8565b3d915061027b565b6040513d5f823e3d90fd5b34610125576020366003190112610125576004356102c6610bc6565b6102d1811515610acc565b7f000000000000000000000000000000000000000000000000000000000000000090604051917f23b872dd000000000000000000000000000000000000000000000000000000005f5233600452306024528160445260205f60648180855af160015f51148116156103aa575b836040525f60605215610375575081527fba24bd9b798cca64d1031eda1ced9398802343e44e07779bb510d7a21ddddef160203392a2005b6001600160a01b03907f5274afe7000000000000000000000000000000000000000000000000000000005f521660045260245ffd5b60018115166103c057813b15153d15161661033d565b833d5f823e3d90fd5b34610125575f3660031901126101255760206040515f8152f35b34610125576040366003190112610125576103fc610a67565b6004355f525f6020526001600160a01b0360405f2091165f52602052602060ff60405f2054166040519015158152f35b3461012557602036600319011261012557610445610a51565b61044d610bc6565b6001600160a01b0381169081156104c9577fffffffffffffffffffffff0000000000000000000000000000000000000000ff74ffffffffffffffffffffffffffffffffffffffff006001549260081b169116176001557f76e9c0f5fdb0fbf94421f62c0e99459ad504905d46356a7cef58cf4513485fde5f80a2005b606460405162461bcd60e51b815260206004820152601460248201527f636f72652061646472657373206973207a65726f0000000000000000000000006044820152fd5b34610125575f36600319011261012557610525610bc6565b61052d610b17565b600160ff19815416176001557f62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a2586020604051338152a1005b34610125575f366003190112610125576040516370a0823160e01b81523060048201526020816024816001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000165afa801561029f575f906105d2575b602090604051908152f35b506020813d6020116105fd575b816105ec60209383610a7d565b8101031261012557602090516105c7565b3d91506105df565b34610125575f3660031901126101255760206040517fa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c217758152f35b34610125575f36600319011261012557602060ff600154166040519015158152f35b34610125575f36600319011261012557610679610bc6565b60015460ff8116156106b85760ff19166001557f5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa6020604051338152a1005b7f8dfc202b000000000000000000000000000000000000000000000000000000005f5260045ffd5b34610125576040366003190112610125576106f9610a67565b336001600160a01b038216036107155761016b90600435610d02565b7f6697b232000000000000000000000000000000000000000000000000000000005f5260045ffd5b346101255760403660031901126101255761016b60043561075c610a67565b90610775610161825f525f602052600160405f20015490565b610c75565b346101255760203660031901126101255760206107a46004355f525f602052600160405f20015490565b604051908152f35b34610125575f3660031901126101255760206001600160a01b0360015460081c16604051908152f35b34610125576040366003190112610125576107ee610a51565b602435906001600160a01b0360015460081c1633036109495761080f610b17565b7f0000000000000000000000000000000000000000000000000000000000000000906040516370a0823160e01b81523060048201526020816024816001600160a01b0387165afa90811561029f575f91610917575b5083116108ad576001600160a01b03816108a2856020947f16cbc685358ca7d4e6b273dcdf2cb5d18c80b950aa2319b519756cd016233a6c96610b4b565b6040519485521692a2005b608460405162461bcd60e51b815260206004820152602660248201527f7661756c743a20696e73756666696369656e742066756e647320666f7220696e60448201527f74657265737400000000000000000000000000000000000000000000000000006064820152fd5b90506020813d602011610941575b8161093260209383610a7d565b81010312610125575184610864565b3d9150610925565b608460405162461bcd60e51b815260206004820152602660248201527f5661756c744d616e616765723a2063616c6c6572206973206e6f74205361766960448201527f6e67436f726500000000000000000000000000000000000000000000000000006064820152fd5b3461012557602036600319011261012557600435907fffffffff00000000000000000000000000000000000000000000000000000000821680920361012557817f7965db0b0000000000000000000000000000000000000000000000000000000060209314908115610a27575b5015158152f35b7f01ffc9a70000000000000000000000000000000000000000000000000000000091501483610a20565b600435906001600160a01b038216820361012557565b602435906001600160a01b038216820361012557565b90601f8019910116810190811067ffffffffffffffff821117610a9f57604052565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52604160045260245ffd5b15610ad357565b606460405162461bcd60e51b815260206004820152601260248201527f616d6f756e74206d757374206265203e203000000000000000000000000000006044820152fd5b60ff60015416610b2357565b7fd93c0665000000000000000000000000000000000000000000000000000000005f5260045ffd5b916001600160a01b03604051927fa9059cbb000000000000000000000000000000000000000000000000000000005f521660045260245260205f60448180865af19060015f5114821615610ba5575b604052156103755750565b906001811516610bbd57823b15153d15161690610b9a565b503d5f823e3d90fd5b335f9081527f7d7ffb7a348e1c6a02869081a26547b49160dd3df72d1d75a570eb9b698292ec602052604090205460ff1615610bfe57565b63e2517d3f60e01b5f52336004527fa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c2177560245260445ffd5b805f525f60205260405f206001600160a01b0333165f5260205260ff60405f20541615610c5f5750565b63e2517d3f60e01b5f523360045260245260445ffd5b805f525f60205260405f206001600160a01b0383165f5260205260ff60405f205416155f14610cfc57805f525f60205260405f206001600160a01b0383165f5260205260405f20600160ff198254161790556001600160a01b03339216907f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d5f80a4600190565b50505f90565b805f525f60205260405f206001600160a01b0383165f5260205260ff60405f2054165f14610cfc57805f525f60205260405f206001600160a01b0383165f5260205260405f2060ff1981541690556001600160a01b03339216907ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b5f80a460019056fea2646970667358221220660a7a6cc89bef1415200c62ed1c1decb6d15c496f05814f0ce681df68d13bb964736f6c634300081c0033",
+  "devdoc": {
+    "details": "Đây chính là kiến trúc hiện thực hóa Business Rule #5 (Mục 6 đề bài):      \"Lãi luôn được trả từ vault, tách biệt khỏi principal\".      VaultManager KHÔNG hề biết gì về Plan, Deposit, APR - nó chỉ biết giữ tiền và      chuyển tiền theo lệnh của SavingCore.",
+    "errors": {
+      "AccessControlBadConfirmation()": [
+        {
+          "details": "The caller of a function is not the expected one. NOTE: Don't confuse with {AccessControlUnauthorizedAccount}."
+        }
+      ],
+      "AccessControlUnauthorizedAccount(address,bytes32)": [
+        {
+          "details": "The `account` is missing a role."
+        }
+      ],
+      "EnforcedPause()": [
+        {
+          "details": "The operation failed because the contract is paused."
+        }
+      ],
+      "ExpectedPause()": [
+        {
+          "details": "The operation failed because the contract is not paused."
+        }
+      ],
+      "SafeERC20FailedOperation(address)": [
+        {
+          "details": "An operation with an ERC-20 token failed."
+        }
+      ]
+    },
+    "events": {
+      "Paused(address)": {
+        "details": "Emitted when the pause is triggered by `account`."
+      },
+      "RoleAdminChanged(bytes32,bytes32,bytes32)": {
+        "details": "Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole` `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite {RoleAdminChanged} not being emitted to signal this."
+      },
+      "RoleGranted(bytes32,address,address)": {
+        "details": "Emitted when `account` is granted `role`. `sender` is the account that originated the contract call. This account bears the admin role (for the granted role). Expected in cases where the role was granted using the internal {AccessControl-_grantRole}."
+      },
+      "RoleRevoked(bytes32,address,address)": {
+        "details": "Emitted when `account` is revoked `role`. `sender` is the account that originated the contract call:   - if using `revokeRole`, it is the admin role bearer   - if using `renounceRole`, it is the role bearer (i.e. `account`)"
+      },
+      "Unpaused(address)": {
+        "details": "Emitted when the pause is lifted by `account`."
+      }
+    },
+    "kind": "dev",
+    "methods": {
+      "constructor": {
+        "params": {
+          "_token": "Địa chỉ MockUSDC (hoặc USDC thật sau này)"
+        }
+      },
+      "fundVault(uint256)": {
+        "details": "CHỈ ADMIN gọi được (không mở public) - đối xứng với withdrawVault(), và khớp với      Mục 4 đề bài liệt kê fundVault nằm trong nhóm \"Admin Functions\".      Admin phải approve() cho VaultManager trước khi gọi hàm này (chuẩn ERC20)."
+      },
+      "getAvailableBalance()": {
+        "details": "\"view\" = chỉ đọc dữ liệu, không tốn gas thật khi gọi từ bên ngoài (off-chain)."
+      },
+      "getRoleAdmin(bytes32)": {
+        "details": "Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}."
+      },
+      "grantRole(bytes32,address)": {
+        "details": "Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event."
+      },
+      "hasRole(bytes32,address)": {
+        "details": "Returns `true` if `account` has been granted `role`."
+      },
+      "paused()": {
+        "details": "Returns true if the contract is paused, and false otherwise."
+      },
+      "payInterest(address,uint256)": {
+        "details": "onlyCore + whenNotPaused: chỉ SavingCore gọi được, và bị chặn khi hệ thống pause      (khớp Business Rule #6 - pause chặn withdraw/renew, mà withdraw/renew đều cần gọi      hàm này để lấy lãi).      Business Rule #5 (Mục 6): nếu vault không đủ tiền, giao dịch PHẢI revert (thất bại)      - dòng require() bên dưới chính là chỗ hiện thực hóa quy tắc này.",
+        "params": {
+          "amount": "Số tiền lãi cần trả",
+          "to": "Địa chỉ user nhận lãi"
+        }
+      },
+      "renounceRole(bytes32,address)": {
+        "details": "Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `callerConfirmation`. May emit a {RoleRevoked} event."
+      },
+      "revokeRole(bytes32,address)": {
+        "details": "Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleRevoked} event."
+      },
+      "setCoreAddress(address)": {
+        "details": "Đây là bước \"nối dây\" giữa 2 contract, làm thủ công sau khi deploy (không thể tự động      vì lúc deploy VaultManager, SavingCore chưa tồn tại - và ngược lại nếu deploy      SavingCore trước thì cũng chưa có địa chỉ VaultManager)."
+      },
+      "supportsInterface(bytes4)": {
+        "details": "Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[ERC section] to learn more about how these ids are created. This function call must use less than 30 000 gas."
+      },
+      "withdrawVault(uint256)": {
+        "details": "Đây là hàm NHẠY CẢM NHẤT trong contract - chỉ admin, và về sau (Creative Challenge C2)      nên thêm \"solvency guard\" để chặn admin rút vượt quá số tiền đã cam kết trả cho      các deposit đang active. Ở Ngày 3 này CHƯA làm C2, chỉ có bản cơ bản."
+      }
+    },
+    "title": "VaultManager",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "fundVault(uint256)": {
+        "notice": "Admin nạp thêm tiền vào vault để đảm bảo đủ thanh khoản trả lãi cho user."
+      },
+      "getAvailableBalance()": {
+        "notice": "Xem vault hiện đang giữ bao nhiêu tiền - dùng để kiểm tra trước khi rút/trả lãi,         hoặc để frontend hiển thị tình trạng thanh khoản."
+      },
+      "payInterest(address,uint256)": {
+        "notice": "Trả lãi cho user - ĐÂY LÀ HÀM DUY NHẤT khiến tiền rời khỏi vault để trả lãi."
+      },
+      "setCoreAddress(address)": {
+        "notice": "Gắn địa chỉ contract SavingCore vào vault - chỉ gọi 1 lần sau khi deploy cả 2 contract."
+      },
+      "withdrawVault(uint256)": {
+        "notice": "Admin rút bớt tiền khỏi vault (ví dụ khi vault dư thừa quá nhiều)."
+      }
+    },
+    "notice": "\"Kho bạc\" của hệ thống - CHỈ giữ tiền dùng để trả LÃI cho user.         KHÔNG giữ tiền gốc (principal) - tiền gốc nằm trong SavingCore.",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 26,
+        "contract": "contracts/VaultManager.sol:VaultManager",
+        "label": "_roles",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(RoleData)21_storage)"
+      },
+      {
+        "astId": 3783,
+        "contract": "contracts/VaultManager.sol:VaultManager",
+        "label": "_paused",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_bool"
+      },
+      {
+        "astId": 10474,
+        "contract": "contracts/VaultManager.sol:VaultManager",
+        "label": "coreAddress",
+        "offset": 1,
+        "slot": "1",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_address,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_bytes32,t_struct(RoleData)21_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+        "numberOfBytes": "32",
+        "value": "t_struct(RoleData)21_storage"
+      },
+      "t_struct(RoleData)21_storage": {
+        "encoding": "inplace",
+        "label": "struct AccessControl.RoleData",
+        "members": [
+          {
+            "astId": 18,
+            "contract": "contracts/VaultManager.sol:VaultManager",
+            "label": "hasRole",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_address,t_bool)"
+          },
+          {
+            "astId": 20,
+            "contract": "contracts/VaultManager.sol:VaultManager",
+            "label": "adminRole",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          }
+        ],
+        "numberOfBytes": "64"
+      }
+    }
+  }
+}
