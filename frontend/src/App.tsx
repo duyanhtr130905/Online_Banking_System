@@ -4,12 +4,17 @@ import { PlanList } from "./components/PlanList";
 import { OpenDepositForm } from "./components/OpenDepositForm";
 import { MyDeposits } from "./components/MyDeposits";
 import { VaultAdminPanel } from "./components/VaultAdminPanel";
+import { ActivityHistory } from "./components/ActivityHistory";
 import { useWalletContext } from "./contexts/WalletContext";
 import { isNetworkConfigured } from "./contracts";
+import { useContracts } from "./hooks/useContracts";
+import { useRole } from "./hooks/useRole";
 import "./App.css";
 
 function App() {
   const { account, chainId } = useWalletContext();
+  const contracts = useContracts();
+  const { isAdmin, loading: roleLoading } = useRole(contracts?.savingCore ?? null, account);
 
   // Network được hỗ trợ khi có address SavingCore hợp lệ
   const isSupported = isNetworkConfigured(chainId);
@@ -77,6 +82,7 @@ function App() {
             <PlanList />
             <OpenDepositForm />
             <MyDeposits />
+            {!roleLoading && !isAdmin && <ActivityHistory mode="user" />}
           </div>
         ) : (
           <div className="app-placeholder">

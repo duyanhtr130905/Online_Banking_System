@@ -5,6 +5,7 @@ import { useRole } from "../hooks/useRole";
 import { useWalletContext } from "../contexts/WalletContext";
 import { usePlansContext } from "../contexts/PlansContext";
 import { extractError } from "../utils/errors";
+import { ActivityHistory } from "./ActivityHistory";
 import "./AdminPanel.css";
 
 export function AdminPanel() {
@@ -20,6 +21,7 @@ export function AdminPanel() {
         <CreatePlanForm />
         <SystemSettings />
       </div>
+      <ActivityHistory mode="admin" />
     </section>
   );
 }
