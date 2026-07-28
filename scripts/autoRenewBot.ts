@@ -1,18 +1,24 @@
 import { deployments, ethers, network } from "hardhat";
 import type { Signer } from "ethers";
 
+// Poll theo chu kỳ thay vì giữ subscription WebSocket để bot hoạt động được với RPC HTTP.
 const DEFAULT_POLL_INTERVAL_MS = 10_000;
+// Chia nhỏ block range để tránh vượt giới hạn `eth_getLogs` của các RPC public.
 const DEFAULT_EVENT_CHUNK_SIZE = 5_000;
+// Chỉ deposit Active mới có thể auto-renew; deposit đã xử lý phải bị loại khỏi hàng đợi.
 const ACTIVE_STATUS = 0;
 
-// The generated Hardhat contract types are not committed in every checkout, so keep this
-// adapter structural and let the ABI selected by getContractAt provide the runtime contract.
+// Không dùng type TypeChain vì file sinh tự động không luôn có ở mọi máy clone project.
+// ABI từ getContractAt vẫn quyết định chính xác contract được gọi khi chạy thực tế.
 type SavingCoreContract = any;
 type VaultManagerContract = any;
 
 export interface BotState {
+  // Candidate giữ cả deposit mới mở và deposit vừa renew, để bot theo dõi xuyên nhiều poll.
   candidateIds: Set<bigint>;
+  // Khóa tạm deposit đang xử lý, tránh một vòng quét gửi hai transaction cho cùng deposit.
   processingIds: Set<bigint>;
+  // Mốc quét cuối cùng giúp không bỏ sót event xuất hiện giữa các lần poll.
   lastScannedBlock: number;
 }
 
@@ -54,6 +60,7 @@ export function getPollIntervalMs(value = process.env.AUTO_RENEW_POLL_MS): numbe
 
 export async function loadSavingCoreFromDeployment(botSigner: Signer) {
   const savingCoreDeployment = await deployments.get("SavingCore");
+  // Deployment JSON có thể còn lại sau khi Hardhat node bị reset; kiểm tra bytecode trước khi chạy bot.
   const code = await ethers.provider.getCode(savingCoreDeployment.address);
 
   if (code === "0x") {
@@ -70,6 +77,7 @@ export async function loadSavingCoreFromDeployment(botSigner: Signer) {
   return { savingCore, vaultManager, savingCoreDeployment };
 }
 
+// Ethers chỉ đảm bảo `args` tại runtime; cô lập việc đọc arg để event không hợp lệ không làm bot dừng.
 function eventArg(event: any, name: string): bigint | undefined {
   const value = event.args?.[name];
   return typeof value === "bigint" ? value : undefined;
@@ -145,6 +153,7 @@ async function processCandidates(context: ScanAndRenewContext, log: (message: st
     vaultManager.paused(),
   ]);
 
+  // Không gọi auto-renew khi một trong hai lớp bị pause: SavingCore quản lý trạng thái, VaultManager trả lãi.
   if (savingCorePaused || vaultPaused) {
     log(
       `[AUTO-RENEW BOT] Tạm dừng xử lý vì ${savingCorePaused ? "SavingCore" : "VaultManager"} đang pause.`,
@@ -157,12 +166,14 @@ async function processCandidates(context: ScanAndRenewContext, log: (message: st
     if (shouldStop()) break;
     if (state.processingIds.has(depositId)) continue;
 
+    // Đọc lại trạng thái on-chain ở mỗi poll vì user có thể withdraw/renew sau lần quét event trước.
     const deposit = await savingCore.getDeposit(depositId);
     if (Number(deposit.status) !== ACTIVE_STATUS) {
       state.candidateIds.delete(depositId);
       continue;
     }
 
+    // Grace period bảo vệ quyền xử lý thủ công của user; bot chỉ can thiệp sau mốc này.
     const eligibleAt = deposit.maturityAt + gracePeriodSeconds;
     if (BigInt(latestBlock.timestamp) < eligibleAt) continue;
 
@@ -170,6 +181,7 @@ async function processCandidates(context: ScanAndRenewContext, log: (message: st
     try {
       log(`[AUTO-RENEW BOT] Deposit #${depositId} đã đủ điều kiện auto-renew.`);
 
+      // Kiểm tra thanh khoản trước để tránh gửi transaction chắc chắn revert khi Vault không đủ tiền trả lãi.
       const interest = await savingCore.calculateInterest(depositId);
       const availableBalance = await vaultManager.getAvailableBalance();
       if (availableBalance < interest) {
@@ -179,6 +191,7 @@ async function processCandidates(context: ScanAndRenewContext, log: (message: st
         continue;
       }
 
+      // Mô phỏng trước để không tốn gas nếu trạng thái thay đổi ngay giữa lúc bot kiểm tra và gửi tx.
       await savingCore.autoRenewDeposit.staticCall(depositId);
       log(`[AUTO-RENEW BOT] Đang gửi auto-renew cho deposit #${depositId}.`);
       const tx = await savingCore.autoRenewDeposit(depositId);
@@ -258,6 +271,7 @@ async function main() {
   const state: BotState = {
     candidateIds: new Set<bigint>(),
     processingIds: new Set<bigint>(),
+    // Bắt đầu ngay trước block deploy để lần quét đầu lấy toàn bộ event của contract hiện tại.
     lastScannedBlock: deploymentBlock - 1,
   };
 
@@ -274,6 +288,7 @@ async function main() {
   const stop = () => {
     if (stopping) return;
     stopping = true;
+    // Đánh thức timer để SIGINT/SIGTERM dừng ngay, không phải chờ hết poll interval.
     wakePoll?.();
   };
   process.once("SIGINT", stop);
