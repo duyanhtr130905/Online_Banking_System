@@ -284,7 +284,7 @@ npx hardhat coverage
 
 Kết quả gần nhất:
 
-- **98 tests passing**.
+- **99 tests passing**.
 - `SavingCore.sol` branch coverage: **96.36%**.
 - `VaultManager.sol` branch coverage: **92.86%**.
 - Toàn project branch coverage: **95.00%**.
